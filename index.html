@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>인생만화 아홉 권 — 내 인생의 만화 9편을 목차 한 장으로</title>
+<meta name="description" content="만화 · 웹툰 · 애니 아홉 편을 골라 표지 격자와 띠지가 있는 이미지 한 장으로 만듭니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="인생만화 아홉 권">
+<meta property="og:description" content="당신의 아홉 편을 목차 한 장으로.">
+<meta property="og:url" content="https://mylifemymanga.vercel.app/">
+<meta property="og:image" content="https://mylifemymanga.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;700;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,400&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   TOKENS — 2색 리소 인쇄: 먹 + 형광 핑크, 색지 지면
+   ───────────────────────────────────────────── */
+:root{
+  --pulp:      #DFD9CB;   /* 만화잡지 색지 */
+  --pulp-lit:  #EBE6DA;   /* 지면 하이라이트 */
+  --pulp-deep: #C6BFAC;   /* 인쇄 그림자 */
+  --ink:       #16171B;   /* 먹 */
+  --ink-soft:  #5B5A55;   /* 흐린 먹 */
+  --spot:      #FF3B5C;   /* 형광 핑크 스팟 잉크 */
+
+  --kr-display: 'Hahmlet', serif;
+  --lt-display: 'Bodoni Moda', serif;
+  --ui:         'IBM Plex Sans KR', system-ui, sans-serif;
+  --data:       'IBM Plex Mono', ui-monospace, monospace;
+
+  --hair: 1px solid var(--ink);
+  --pad: clamp(14px, 2.2vw, 26px);
+}
+
+*{ box-sizing:border-box }
+html,body{ margin:0 }
+body{
+  background:var(--pulp);
+  color:var(--ink);
+  font-family:var(--ui);
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  /* 색지 인쇄 특유의 얼룩 */
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.5) 0, transparent 42%),
+    radial-gradient(circle at 84% 78%, rgba(198,191,172,.55) 0, transparent 46%);
+  background-attachment:fixed;
+}
+button{ font:inherit; color:inherit; cursor:pointer }
+:focus-visible{ outline:2px solid var(--spot); outline-offset:2px }
+.vh{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap }
+
+/* ── 마스트헤드 ───────────────────────────── */
+.masthead{
+  background:var(--ink); color:var(--pulp);
+  display:flex; align-items:center; gap:clamp(10px,2vw,22px);
+  padding:9px var(--pad);
+  font-family:var(--data); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  position:sticky; top:0; z-index:40;
+}
+.masthead__mark{ font-family:var(--lt-display); font-size:15px; letter-spacing:.1em; text-transform:none }
+.masthead__rule{ flex:1; height:1px; background:var(--pulp); opacity:.45; transform-origin:left;
+  animation:draw .7s cubic-bezier(.2,.8,.2,1) both }
+@keyframes draw{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+.masthead__folio{ color:var(--spot) }
+
+/* ── 지면 레이아웃: 좌 편집대 / 우 조판면 ── */
+.spread{
+  display:grid;
+  grid-template-columns:minmax(320px, 400px) 1fr;
+  align-items:start;
+  gap:0;
+  max-width:1440px; margin:0 auto;
+  border-left:var(--hair); border-right:var(--hair);
+  min-height:calc(100vh - 39px);
+}
+.desk{ padding:var(--pad); border-right:var(--hair); position:sticky; top:39px }
+.plate{ padding:var(--pad) }
+
+/* ── 헤드라인 ─────────────────────────────── */
+.hl{ margin:2px 0 4px }
+.hl__eyebrow{
+  font-family:var(--data); font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--ink-soft); display:flex; align-items:center; gap:8px;
+}
+.hl__eyebrow::after{ content:""; flex:1; height:1px; background:var(--pulp-deep) }
+.hl__kr{
+  font-family:var(--kr-display); font-weight:900;
+  font-size:clamp(38px, 4.6vw, 60px); line-height:.93; letter-spacing:-.03em;
+  margin:.28em 0 .1em; word-break:keep-all;
+}
+.hl__kr em{ font-style:normal; color:var(--spot) }
+.hl__lt{
+  font-family:var(--lt-display); font-style:italic; font-size:15px;
+  color:var(--ink-soft); letter-spacing:.01em;
+}
+.hl__note{ font-size:12.5px; color:var(--ink-soft); margin:.9em 0 0; max-width:34ch }
+
+/* ── 검색 ─────────────────────────────────── */
+.find{ margin-top:20px }
+.find__label{
+  font-family:var(--data); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  display:block; margin-bottom:6px;
+}
+.find__box{ display:flex; border:2px solid var(--ink); background:var(--pulp-lit) }
+.find__box:focus-within{ box-shadow:3px 3px 0 var(--spot) }
+.find__input{
+  flex:1; border:0; background:transparent; padding:11px 12px;
+  font-family:var(--ui); font-size:15px; min-width:0;
+}
+.find__input:focus{ outline:none }
+.find__clear{ border:0; background:transparent; padding:0 12px; color:var(--ink-soft); font-size:18px; line-height:1 }
+.find__state{ font-family:var(--data); font-size:11px; color:var(--ink-soft); min-height:1.5em; margin-top:7px }
+.find__state[data-tone="err"]{ color:var(--spot) }
+
+.results{ list-style:none; margin:6px 0 0; padding:0; max-height:min(46vh,430px); overflow:auto; overscroll-behavior:contain }
+.results::-webkit-scrollbar{ width:8px }
+.results::-webkit-scrollbar-thumb{ background:var(--pulp-deep) }
+.hit{
+  display:grid; grid-template-columns:38px 1fr auto; gap:11px; align-items:center;
+  width:100%; text-align:left; border:0; border-bottom:1px solid var(--pulp-deep);
+  background:transparent; padding:9px 4px;
+}
+.hit:hover,.hit[aria-selected="true"]{ background:var(--pulp-lit) }
+.hit[aria-selected="true"]{ box-shadow:inset 3px 0 0 var(--spot) }
+.hit__cover{ width:38px; height:53px; object-fit:cover; background:var(--pulp-deep); display:block }
+.hit__title{ font-weight:500; font-size:13.5px; line-height:1.3; overflow-wrap:anywhere }
+.hit__meta{ font-family:var(--data); font-size:10.5px; color:var(--ink-soft); margin-top:2px }
+.hit__add{ font-family:var(--data); font-size:16px; color:var(--spot) }
+
+/* ── 직접 올리기 ──────────────────────────── */
+.upload{ margin-top:16px; border-top:var(--hair); padding-top:14px }
+.upload__hint{ font-size:12px; color:var(--ink-soft); margin:0 0 9px }
+.btn{
+  border:2px solid var(--ink); background:var(--pulp-lit); padding:9px 14px;
+  font-family:var(--data); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+  transition:transform .12s, box-shadow .12s;
+}
+.btn:hover:not(:disabled){ transform:translate(-2px,-2px); box-shadow:3px 3px 0 var(--ink) }
+.btn:disabled{ opacity:.4; cursor:not-allowed }
+.btn--spot{ background:var(--spot); color:var(--pulp-lit); border-color:var(--ink) }
+.btn--bare{ border:0; background:transparent; text-decoration:underline; padding:6px 0 }
+.btn-row{ display:flex; flex-wrap:wrap; gap:8px }
+
+/* ── 조판면: 3×3 ──────────────────────────── */
+.plate__head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  border-bottom:2px solid var(--ink); padding-bottom:7px; margin-bottom:var(--pad);
+  font-family:var(--data); font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+}
+.plate__count{ color:var(--spot) }
+
+.grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(8px,1.1vw,14px);
+  max-width:760px;
+}
+.slot{
+  position:relative; aspect-ratio:5/7; border:var(--hair); background:var(--pulp-lit);
+  padding:0; overflow:hidden; display:block; width:100%;
+}
+.slot[data-empty="true"]{ background:
+  repeating-linear-gradient(45deg, transparent 0 7px, rgba(198,191,172,.5) 7px 8px) var(--pulp-lit) }
+.slot[data-active="true"]{ border-color:var(--spot); box-shadow:inset 0 0 0 2px var(--spot) }
+.slot[data-over="true"]{ box-shadow:inset 0 0 0 3px var(--spot) }
+.slot__folio{
+  position:absolute; top:0; left:0; z-index:3;
+  font-family:var(--data); font-size:10.5px; line-height:1;
+  background:var(--ink); color:var(--pulp); padding:4px 6px;
+}
+.slot[data-empty="false"] .slot__folio{ background:var(--spot); color:var(--ink) }
+.slot__img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
+.slot--reg .slot__img{ animation:register .34s cubic-bezier(.2,.9,.2,1) both }
+@keyframes register{
+  0%{ transform:translate(6px,-5px); opacity:0 }
+  60%{ transform:translate(-2px,2px); opacity:1 }
+  100%{ transform:translate(0,0) }
+}
+/* 표지 못 불러오면 활자 조판으로 대체 */
+.slot__type{
+  position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
+  padding:10px; text-align:left; background:var(--ink); color:var(--pulp);
+}
+.slot__type b{ font-family:var(--kr-display); font-weight:900; font-size:clamp(13px,1.5vw,19px); line-height:1.05 }
+.slot__type span{ font-family:var(--data); font-size:10px; color:var(--spot); margin-top:6px }
+.slot__cap{
+  position:absolute; left:0; right:0; bottom:0; z-index:3;
+  background:rgba(22,23,27,.86); color:var(--pulp-lit);
+  font-family:var(--ui); font-size:11px; line-height:1.3; padding:6px;
+  border:0; border-top:2px solid transparent; width:100%; cursor:text;
+}
+.slot__cap:hover{ border-top-color:var(--spot) }
+.slot__cap:focus{ outline:none; background:var(--ink); border-top-color:var(--spot) }
+.slot__x{
+  position:absolute; top:0; right:0; z-index:4; border:0; width:26px; height:26px;
+  background:var(--ink); color:var(--pulp); font-size:14px; line-height:1; opacity:0;
+}
+.slot:hover .slot__x,.slot:focus-within .slot__x{ opacity:1 }
+.slot__empty{
+  position:absolute; inset:0; display:grid; place-content:center; gap:3px;
+  font-family:var(--data); font-size:10px; letter-spacing:.14em; color:var(--ink-soft); text-transform:uppercase;
+}
+
+/* ── 띠지 (시그니처) ──────────────────────── */
+.obi{
+  max-width:760px; margin-top:clamp(10px,1.4vw,16px);
+  background:var(--spot); border:var(--hair);
+  display:grid; grid-template-columns:auto 1fr; align-items:stretch;
+}
+.obi__stamp{
+  border-right:var(--hair); padding:10px 9px;
+  font-family:var(--data); font-size:10px; letter-spacing:.16em;
+  writing-mode:vertical-rl; text-orientation:mixed; text-transform:uppercase;
+}
+.obi__fields{ padding:10px 12px; display:grid; gap:4px }
+.obi__copy,.obi__name{
+  border:0; background:transparent; width:100%; font-family:var(--kr-display); color:var(--ink);
+  padding:0; resize:none;
+}
+.obi__copy{ font-weight:700; font-size:clamp(16px,2vw,23px); line-height:1.2 }
+.obi__name{ font-family:var(--data); font-size:11px; letter-spacing:.12em; text-transform:uppercase }
+.obi__copy::placeholder,.obi__name::placeholder{ color:rgba(22,23,27,.45) }
+.obi__copy:focus,.obi__name:focus{ outline:none; background:rgba(255,255,255,.28) }
+
+/* ── 내보내기 ─────────────────────────────── */
+.finish{ max-width:760px; margin-top:clamp(16px,2vw,24px); border-top:2px solid var(--ink); padding-top:14px;
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center }
+.seg{ display:flex; border:2px solid var(--ink) }
+.seg button{ border:0; background:var(--pulp-lit); padding:8px 13px; font-family:var(--data); font-size:11px }
+.seg button+button{ border-left:2px solid var(--ink) }
+.seg button[aria-pressed="true"]{ background:var(--ink); color:var(--pulp) }
+.check{ display:flex; align-items:center; gap:7px; font-family:var(--data); font-size:11px; text-transform:uppercase; letter-spacing:.1em }
+.check input{ accent-color:var(--spot); width:15px; height:15px }
+.finish__msg{ font-family:var(--data); font-size:11px; color:var(--ink-soft); flex-basis:100%; min-height:1.4em }
+.finish__msg[data-tone="err"]{ color:var(--spot) }
+
+.colophon{
+  max-width:760px; margin:26px 0 0; border-top:1px solid var(--pulp-deep); padding:12px 0 30px;
+  font-family:var(--data); font-size:10.5px; line-height:1.7; color:var(--ink-soft);
+}
+.colophon b{ color:var(--ink); font-weight:500 }
+
+/* ── 모바일 ───────────────────────────────── */
+@media (max-width:900px){
+  .spread{ grid-template-columns:1fr; border:0 }
+  .desk{ position:static; border-right:0; border-bottom:var(--hair); order:1 }
+  .plate{ order:2 }
+  .results{ max-height:300px }
+}
+@media (prefers-reduced-motion:reduce){
+  *{ animation:none !important; transition:none !important }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <span class="masthead__mark">My Life, My Manga</span>
+  <span class="masthead__rule"></span>
+  <span>목차 지면</span>
+  <span class="masthead__folio" id="mhFolio">000/009</span>
+</header>
+
+<main class="spread">
+
+  <!-- ══ 편집대 ══ -->
+  <section class="desk" aria-label="작품 고르기">
+    <div class="hl">
+      <p class="hl__eyebrow">전 9편 · 창간호</p>
+      <h1 class="hl__kr">내 인생의<br>만화 <em>9</em></h1>
+      <p class="hl__lt">Nine that stayed with you.</p>
+      <p class="hl__note">아홉 칸을 채우면 목차 한 장이 됩니다. 칸을 고르고 작품을 누르면 그 자리에 들어가고, 칸끼리 끌어다 놓으면 자리가 바뀝니다. 표지 아래 제목은 눌러서 고쳐 쓰세요.</p>
+    </div>
+
+    <div class="find">
+      <label class="find__label" for="q">검색 — 작품 제목 또는 작가 이름</label>
+      <div class="find__box">
+        <input class="find__input" id="q" type="search" autocomplete="off" spellcheck="false"
+               placeholder="슬램덩크 · One Piece · 이노우에 다케히코 · 박태준"
+               role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
+        <button class="find__clear" id="qClear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
+      </div>
+      <p class="find__state" id="findState" role="status">제목과 작가 이름 모두, 한국어 · 영어 · 원어로 찾습니다.</p>
+      <ul class="results" id="results" role="listbox" aria-label="검색 결과"></ul>
+    </div>
+
+    <div class="upload">
+      <p class="upload__hint">검색에 없는 작품은 표지 파일을 직접 올려 넣으세요. 국내 독점 웹툰은 대체로 이쪽입니다.</p>
+      <div class="btn-row">
+        <button class="btn" id="btnUpload" type="button">표지 올리기</button>
+        <button class="btn" id="btnDemo" type="button">예시로 채우기</button>
+      </div>
+      <input type="file" id="file" accept="image/*" multiple hidden>
+    </div>
+  </section>
+
+  <!-- ══ 조판면 ══ -->
+  <section class="plate" aria-label="내보낼 지면">
+    <div class="plate__head">
+      <span>조판면 · <span id="ratioLabel">4:5</span></span>
+      <span class="plate__count" id="plateCount">빈 칸 9</span>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="obi">
+      <span class="obi__stamp">띠지 / OBI</span>
+      <div class="obi__fields">
+        <input class="obi__copy" id="obiCopy" maxlength="35" placeholder="여기에 한 줄 — 이 아홉 편이 나에게 무엇이었는지">
+        <input class="obi__name" id="obiName" maxlength="26" placeholder="엮은이 이름">
+      </div>
+    </div>
+
+    <div class="finish">
+      <div class="seg" role="group" aria-label="이미지 비율">
+        <button type="button" data-ratio="1:1" aria-pressed="false">1:1</button>
+        <button type="button" data-ratio="4:5" aria-pressed="true">4:5</button>
+        <button type="button" data-ratio="2:3" aria-pressed="false">2:3</button>
+      </div>
+      <label class="check"><input type="checkbox" id="optCaps" checked> 저장 이미지에 제목 넣기</label>
+      <button class="btn btn--spot" id="btnSave" type="button">이미지 저장</button>
+      <button class="btn" id="btnShare" type="button">공유 주소 복사</button>
+      <button class="btn btn--bare" id="btnReset" type="button">처음부터</button>
+      <p class="finish__msg" id="finishMsg" role="status"></p>
+    </div>
+
+    <p class="colophon">
+      <b>표지 출처</b> <span data-credit>AniList</span> — 만화 · 웹툰 · 애니를 한 번에 검색합니다. API 키 없이 동작합니다.<br>
+      <b>제목</b> 한국어 제목 필드가 없어 일본 작품은 영어로 옵니다. 자주 쓰는 작품은 어댑터 안 <b>ALIAS</b>에 추가하거나, 칸에서 직접 고쳐 쓰세요.<br>
+      <b>공유 주소</b> 검색으로 넣은 작품과 띠지 문구만 주소에 담깁니다. 직접 올린 표지는 파일이라 담기지 않습니다.<br>
+      <b>저장 규격</b> PNG · 4:5 2160&times;2700 · 1:1 2160&times;2160 · 2:3 2160&times;3240. 비율마다 조판이 다릅니다.
+    </p>
+  </section>
+</main>
+
+<canvas id="stage" width="2160" height="2160" hidden></canvas>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   설정
+   ═══════════════════════════════════════════════════════ */
+/* 표지를 캔버스에 그릴 때 CORS가 막히면 이 프록시로 우회합니다.
+   Vercel에 올리실 때는 직접 만든 이미지 프록시 주소로 바꾸시면 더 안전합니다. */
+const PROXIES = [
+  u => '/api/cover?url=' + encodeURIComponent(u),        /* 같은 도메인이라 가장 확실하다 */
+  u => 'https://wsrv.nl/?url=' + encodeURIComponent(u),
+  u => 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u)
+];
+
+/* ═══════════════════════════════════════════════════════
+   소스 어댑터
+   엔진은 search(term)과 byIds(ids) 두 함수만 알면 된다.
+   영화·드라마 페이지를 붙일 때는 같은 규약의 어댑터를 하나 더 만들고
+   아래 SOURCE만 바꾼다. 격자 · 조판 · 저장 · 공유는 손댈 필요가 없다.
+   ═══════════════════════════════════════════════════════ */
+const AniList = (() => {
+  const API = 'https://graphql.anilist.co';
+  /* AniList는 한국어 검색이 약합니다. 자주 찾는 작품은 별칭으로 넘겨주고,
+     목록에도 한국어 제목으로 보여줍니다. 필요한 작품을 계속 추가하세요. */
+  const HANGUL = /[가-힣]/;
+  const ALIAS = {
+    '슬램덩크':'Slam Dunk','원피스':'One Piece','나루토':'Naruto','드래곤볼':'Dragon Ball',
+    '진격의 거인':'Shingeki no Kyojin','귀멸의 칼날':'Kimetsu no Yaiba','주술회전':'Jujutsu Kaisen',
+    '체인소맨':'Chainsaw Man','강철의 연금술사':'Fullmetal Alchemist','하이큐':'Haikyuu',
+    '베르세르크':'Berserk','몬스터':'Monster','20세기 소년':'20th Century Boys','플루토':'Pluto',
+    '유리 가면':'Glass Mask','바람의 검심':'Rurouni Kenshin','이누야샤':'Inuyasha',
+    '명탐정 코난':'Detective Conan','도라에몽':'Doraemon','짱구는 못말려':'Crayon Shin-chan',
+    '카드캡터 사쿠라':'Cardcaptor Sakura','세일러문':'Sailor Moon','에반게리온':'Evangelion',
+    '데스노트':'Death Note','원펀맨':'One Punch Man','블리치':'Bleach','헌터x헌터':'Hunter x Hunter',
+    '은혼':'Gintama','도쿄 리벤저스':'Tokyo Revengers','스파이 패밀리':'Spy x Family',
+    '4월은 너의 거짓말':'Shigatsu wa Kimi no Uso','너의 이름은':'Kimi no Na wa',
+    '센과 치히로의 행방불명':'Sen to Chihiro','하울의 움직이는 성':'Howl no Ugoku Shiro',
+    '신의 탑':'Tower of God','전지적 독자 시점':'Omniscient Reader','화산귀환':'Return of the Blossoming Blade',
+    '나 혼자만 레벨업':'Solo Leveling','외모지상주의':'Lookism','여신강림':'True Beauty',
+    '치즈인더트랩':'Cheese in the Trap','미생':'Misaeng','내부자들':'Insiders','송곳':'Awl',
+    '유미의 세포들':'Yumi\'s Cells','노블레스':'Noblesse','갓 오브 하이스쿨':'The God of High School',
+    '베가본드':'Vagabond','아즈망가 대왕':'Azumanga Daioh','3월의 라이온':'March Comes in Like a Lion',
+    '허니와 클로버':'Honey and Clover','노다메 칸타빌레':'Nodame Cantabile','프루츠 바스켓':'Fruits Basket',
+    '더 파이팅':'Hajime no Ippo','터치':'Touch','H2':'H2','오디션':'Audition','루키즈':'Rookies',
+    '테니스의 왕자':'The Prince of Tennis','유희왕':'Yu-Gi-Oh!','흑집사':'Black Butler',
+    '아키라':'Akira','공각기동대':'Ghost in the Shell','카우보이 비밥':'Cowboy Bebop',
+    '이웃집 토토로':'My Neighbor Totoro','마녀 배달부 키키':'Kiki\'s Delivery Service',
+    '원령공주':'Princess Mononoke','바람계곡의 나우시카':'Nausicaa of the Valley of the Wind',
+    '목소리의 형태':'A Silent Voice','날씨의 아이':'Weathering with You','스즈메의 문단속':'Suzume',
+    '토라도라':'Toradora!','클라나드':'Clannad','봇치 더 락':'Bocchi the Rock!',
+    '유루캠':'Laid-Back Camp','울려라 유포니엄':'Sound! Euphonium','좀비 랜드 사가':'Zombie Land Saga',
+    '오야스미 푼푼':'Goodnight Punpun','우주형제':'Space Brothers','기생수':'Parasyte',
+    '아이 엠 어 히어로':'I Am a Hero','헬크':'Hellsing','베르사이유의 장미':'The Rose of Versailles',
+    '풀 메탈 패닉':'Full Metal Panic!','기동전사 건담':'Mobile Suit Gundam'
+  };
+  const KR_OF = Object.fromEntries(Object.entries(ALIAS).map(([k,v])=>[v.toLowerCase(),k]));
+
+  /* 작가 이름도 마찬가지다. 한국 작가는 AniList 원어 표기가 한글이라 그대로 검색되고,
+     일본 작가는 한국어 음차가 안 맞으니 사전으로 넘긴다. */
+  const STAFF_ALIAS = {
+    '이노우에 다케히코':'Takehiko Inoue','우라사와 나오키':'Naoki Urasawa','미우라 켄타로':'Kentarou Miura',
+    '토리야마 아키라':'Akira Toriyama','오다 에이이치로':'Eiichirou Oda','키시모토 마사시':'Masashi Kishimoto',
+    '아라카와 히로무':'Hiromu Arakawa','이사야마 하지메':'Hajime Isayama','후지모토 타츠키':'Tatsuki Fujimoto',
+    '아사노 이니오':'Inio Asano','아다치 미츠루':'Mitsuru Adachi','타카하시 루미코':'Rumiko Takahashi',
+    '테즈카 오사무':'Osamu Tezuka','나가이 고':'Go Nagai','오토모 카츠히로':'Katsuhiro Otomo',
+    '시로 마사무네':'Masamune Shirow','이토 준지':'Junji Itou','우메즈 카즈오':'Kazuo Umezu',
+    '토가시 요시히로':'Yoshihiro Togashi','쿠보 타이토':'Tite Kubo','무라타 유스케':'Yuusuke Murata',
+    '고토게 코요하루':'Koyoharu Gotouge','아쿠타미 게게':'Gege Akutami','엔도 타츠야':'Tatsuya Endou',
+    '이시다 스이':'Sui Ishida','오오이마 요시토키':'Yoshitoki Ooima','모리 카오루':'Kaoru Mori',
+    '야자와 아이':'Ai Yazawa','타케우치 나오코':'Naoko Takeuchi','아오야마 고쇼':'Gosho Aoyama',
+    '후지코 F 후지오':'Fujiko F. Fujio','우스이 요시토':'Yoshito Usui','후루야 미노루':'Minoru Furuya',
+    '미야자키 하야오':'Hayao Miyazaki','신카이 마코토':'Makoto Shinkai','호소다 마모루':'Mamoru Hosoda',
+    '유아사 마사아키':'Masaaki Yuasa','안노 히데아키':'Hideaki Anno','니시오 이신':'NisiOisiN',
+    '오바 츠구미':'Tsugumi Ohba','오바타 타케시':'Takeshi Obata','아즈마 키요히코':'Kiyohiko Azuma',
+    '이와아키 히토시':'Hitoshi Iwaaki','타이요 마츠모토':'Taiyou Matsumoto'
+  };
+  const STAFF_KR = Object.fromEntries(Object.entries(STAFF_ALIAS).map(([k,v])=>[v.toLowerCase(),k]));
+  const krName = n => {
+    if(!n) return '';
+    if(n.native && HANGUL.test(n.native)) return n.native;
+    return STAFF_KR[(n.full||'').toLowerCase()] || n.full || n.native || '';
+  };
+
+  const DEMO = ['Slam Dunk','Berserk','20th Century Boys','Fullmetal Alchemist','Vagabond',
+                'Oyasumi Punpun','Tower of God','Sen to Chihiro','Haikyuu'];
+  /* 사전 조회 — 풀네임이 아니어도 앞글자나 일부만으로 걸리게 한다. */
+  const squash = s => s.replace(/[\s·-]/g,'').toLowerCase();
+  function candidates(dict, term){
+    const t = squash(term);
+    if(t.length < 2) return [];
+    const keys = Object.keys(dict);
+    const starts = keys.filter(k => squash(k).startsWith(t));
+    const inside = keys.filter(k => !starts.includes(k) && squash(k).includes(t));
+    const hit = [...starts, ...inside].slice(0,3);
+    return { names: hit, queries: [...new Set(hit.map(k=>dict[k]))] };
+  }
+
+  const FRAG = `fragment F on Media {
+    id title{romaji english native} synonyms format countryOfOrigin
+    startDate{year} coverImage{extraLarge large}
+    staff(perPage:2){ nodes{ name{ full native } } }
+  }`;
+  function buildQuery(titleTerms, staffTerms){
+    const parts = [], vars = {};
+    titleTerms.forEach((v,i)=>{
+      vars['t'+i] = v;
+      parts.push(`t${i}: Page(perPage:12){ media(search:$t${i}, sort:[SEARCH_MATCH,POPULARITY_DESC], isAdult:false){ ...F } }`);
+    });
+    staffTerms.forEach((v,i)=>{
+      vars['s'+i] = v;
+      parts.push(`s${i}: Page(perPage:2){ staff(search:$s${i}){ name{ full native } staffMedia(sort:POPULARITY_DESC, perPage:8){ nodes{ ...F } } } }`);
+    });
+    const decl = Object.keys(vars).map(k=>`$${k}:String`).join(',');
+    return { query:`query(${decl}){\n${parts.join('\n')}\n}\n${FRAG}`, vars };
+  }
+
+  async function gql(query, variables){
+    const r = await fetch(API,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({query,variables})
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    if(j.errors) throw new Error(j.errors[0].message);
+    return j.data;
+  }
+
+  const kindOf = m => {
+    const f=m.format, kr=m.countryOfOrigin==='KR';
+    if(f==='MANGA'||f==='ONE_SHOT') return kr?'웹툰':(m.countryOfOrigin==='CN'?'만화 · 중국':'만화');
+    if(f==='NOVEL') return '소설';
+    if(f==='MOVIE') return '애니 · 극장';
+    return '애니';
+  };
+  const titleOf = m => {
+    const en=m.title.english, ro=m.title.romaji, na=m.title.native;
+    const alias = KR_OF[(en||'').toLowerCase()] || KR_OF[(ro||'').toLowerCase()];
+    if(alias) return alias;                                    /* 1. 사전에 있는 한국어 제목 */
+    const syn = (m.synonyms||[]).find(s=>HANGUL.test(s));
+    if(syn) return syn;                                        /* 2. 한글 이명 */
+    if(na && HANGUL.test(na)) return na;                       /* 3. 한국 작품의 원제 */
+    return en || ro || na;                                     /* 4. 남는 것 */
+  };
+  const packWork = m => {
+    const by = (m.staff?.nodes||[]).map(s=>krName(s.name)).filter(Boolean)[0] || '';
+    const t = titleOf(m);
+    return {
+      id:m.id, title:t, origTitle:t, by,
+      meta:[kindOf(m), m.startDate?.year, by].filter(Boolean).join(' · '),
+      src:m.coverImage.extraLarge || m.coverImage.large
+    };
+  };
+
+  const hasCover = m => !!(m.coverImage?.extraLarge || m.coverImage?.large);
+
+  async function search(term){
+    const t = term.trim();
+    const byTitle = candidates(ALIAS, t), byStaff = candidates(STAFF_ALIAS, t);
+    const titleTerms = [...new Set([t, ...byTitle.queries])].slice(0,3);
+    const staffTerms = [...new Set([t, ...byStaff.queries])].slice(0,2);
+
+    const { query, vars } = buildQuery(titleTerms, staffTerms);
+    const d = await gql(query, vars);
+
+    const out = [], seen = new Set();
+    const push = w => { if(!seen.has(w.id)){ seen.add(w.id); out.push(w); } };
+
+    titleTerms.forEach((_,i)=>                             /* 제목으로 걸린 작품 */
+      (d['t'+i]?.media || []).filter(hasCover).map(packWork).forEach(push));
+
+    staffTerms.forEach((_,i)=>                             /* 작가로 걸린 작품 */
+      (d['s'+i]?.staff || []).forEach(s => {
+        const who = krName(s.name);
+        (s.staffMedia?.nodes || []).filter(hasCover).map(packWork).forEach(w => {
+          if(!w.by){ w.by = who; w.meta = w.meta ? w.meta+' · '+who : who; }
+          push(w);
+        });
+      }));
+
+    const guessed = [...byTitle.names, ...byStaff.names].filter(n=>squash(n)!==squash(t));
+    return { items: out.slice(0,24), guessed };
+  }
+
+  async function byIds(ids){
+    if(!ids.length) return [];
+    const d = await gql(`query($ids:[Int]){Page(perPage:50){media(id_in:$ids){...F}}}\n${FRAG}`,{ids});
+    return d.Page.media.map(packWork);
+  }
+
+  return {
+    key: 'a',                            /* 공유 주소에 붙는 소스 표시 */
+    credit: 'AniList',
+    label: '검색 — 작품 제목 또는 작가 이름',
+    placeholder: '슬램덩크 · One Piece · 이노우에 다케히코 · 박태준',
+    demo: DEMO,
+    search, byIds
+  };
+})();
+
+const SOURCE = AniList;
+
+/* ═══════════════════════════════════════════════════════
+   상태
+   ═══════════════════════════════════════════════════════ */
+const slots = Array(9).fill(null);   // {id?,title,meta,src,local?}
+let active = null, ratio = '4:5', caps = true, hits = [], cursor = -1;
+
+const $ = s => document.querySelector(s);
+const gridEl=$('#grid'), resEl=$('#results'), qEl=$('#q'), stateEl=$('#findState'), msgEl=$('#finishMsg');
+
+/* ═══════════════════════════════════════════════════════
+   그리기 — 3×3
+   ═══════════════════════════════════════════════════════ */
+function renderGrid(justFilled){
+  gridEl.innerHTML = '';
+  slots.forEach((w,i)=>{
+    const b = document.createElement('div');
+    b.setAttribute('role','button'); b.tabIndex = 0;
+    b.className='slot' + (justFilled===i?' slot--reg':'');
+    b.dataset.empty = w?'false':'true';
+    b.dataset.i = i;
+    b.dataset.active = String(active===i);
+    b.draggable = !!w;
+    b.setAttribute('aria-label', w ? `${i+1}번 칸 — ${w.title}. 누르면 이 칸을 고릅니다. Delete로 비웁니다.`
+                                   : `${i+1}번 칸 비어 있음. 누르면 이 칸을 고릅니다.`);
+    b.innerHTML = `<span class="slot__folio">${String(i+1).padStart(2,'0')}</span>`;
+
+    if(w){
+      const img = new Image();
+      img.className='slot__img'; img.alt=''; img.loading='lazy';
+      img.referrerPolicy='no-referrer';              /* 표시용은 CORS를 걸지 않는다 */
+      img.src = w.src;
+      img.onerror = ()=>{ img.remove(); b.insertAdjacentHTML('beforeend',
+        `<span class="slot__type"><b>${esc(w.title)}</b><span>표지 없음</span></span>`); };
+      b.appendChild(img);
+      const cap = document.createElement('input');
+      cap.className='slot__cap'; cap.value=w.title; cap.maxLength=44;
+      cap.setAttribute('aria-label', `${i+1}번 칸 제목`);
+      cap.onclick = e=>e.stopPropagation();
+      cap.onkeydown = e=>{ e.stopPropagation(); if(e.key==='Enter') cap.blur(); };
+      cap.oninput = ()=>{ w.title = cap.value; clearTimeout(w._t); w._t=setTimeout(writeHash,400); };
+      b.appendChild(cap);
+      const x=document.createElement('button');
+      x.type='button'; x.className='slot__x'; x.innerHTML='&times;';
+      x.setAttribute('aria-label',`${i+1}번 칸 비우기`);
+      x.onclick = e=>{ e.stopPropagation(); slots[i]=null; sync(); };
+      b.appendChild(x);
+    }else{
+      b.insertAdjacentHTML('beforeend', `<span class="slot__empty">빈 칸</span>`);
+    }
+
+    b.onclick = ()=>{ active = active===i ? null : i; sync(); };
+    b.onkeydown = e=>{
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); b.click(); }
+      if(e.key==='Delete'||e.key==='Backspace'){ e.preventDefault(); slots[i]=null; sync(); }
+    };
+    b.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain',String(i)); e.dataTransfer.effectAllowed='move'; });
+    b.addEventListener('dragover', e=>{ e.preventDefault(); b.dataset.over='true'; });
+    b.addEventListener('dragleave', ()=>{ delete b.dataset.over; });
+    b.addEventListener('drop', e=>{
+      e.preventDefault(); delete b.dataset.over;
+      const from = +e.dataTransfer.getData('text/plain');
+      if(Number.isInteger(from) && from!==i){ [slots[from],slots[i]]=[slots[i],slots[from]]; sync(); }
+    });
+    gridEl.appendChild(b);
+  });
+}
+
+function sync(justFilled){
+  renderGrid(justFilled);
+  const filled = slots.filter(Boolean).length;
+  $('#plateCount').textContent = filled===9 ? '아홉 칸 모두 채움' : `빈 칸 ${9-filled}`;
+  $('#mhFolio').textContent = String(filled).padStart(3,'0')+'/009';
+  $('#btnSave').disabled = filled===0;
+  writeHash();
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ═══════════════════════════════════════════════════════
+   검색 UI
+   ═══════════════════════════════════════════════════════ */
+let timer, seq=0;
+qEl.addEventListener('input', ()=>{
+  const v = qEl.value.trim();
+  $('#qClear').hidden = !v;
+  clearTimeout(timer);
+  if(v.length < 2){ hits=[]; drawHits(); stateEl.dataset.tone=''; stateEl.textContent='두 글자부터 찾습니다.'; return; }
+  stateEl.dataset.tone=''; stateEl.textContent='찾는 중…';
+  timer = setTimeout(async ()=>{
+    const my = ++seq;
+    try{
+      const { items, guessed } = await SOURCE.search(v);
+      if(my!==seq) return;
+      hits = items; cursor = -1; drawHits();
+      const also = guessed.length ? ` ${guessed.slice(0,2).join(', ')}(으)로도 찾았습니다.` : '';
+      stateEl.textContent = items.length
+        ? `${items.length}편 찾았습니다. 누르면 칸에 들어갑니다.${also}`
+        : '못 찾았습니다. 원제나 영어 표기로 바꿔보시거나 표지를 직접 올리세요.';
+    }catch(err){
+      if(my!==seq) return;
+      hits=[]; drawHits();
+      stateEl.dataset.tone='err';
+      stateEl.textContent = '검색 서버에 닿지 못했습니다. 연결을 확인하거나 표지를 직접 올려 채우세요.';
+    }
+  }, 300);
+});
+$('#qClear').onclick = ()=>{ qEl.value=''; $('#qClear').hidden=true; hits=[]; drawHits(); qEl.focus(); };
+
+function drawHits(){
+  resEl.innerHTML='';
+  qEl.setAttribute('aria-expanded', String(hits.length>0));
+  hits.forEach((w,n)=>{
+    const li=document.createElement('li'); li.setAttribute('role','none');
+    const b=document.createElement('button');
+    b.type='button'; b.className='hit'; b.setAttribute('role','option');
+    b.setAttribute('aria-selected', String(n===cursor));
+    b.innerHTML = `<img class="hit__cover" src="${w.src}" alt="" loading="lazy" referrerpolicy="no-referrer">
+      <span><span class="hit__title">${esc(w.title)}</span><span class="hit__meta">${esc(w.meta)}</span></span>
+      <span class="hit__add" aria-hidden="true">＋</span>`;
+    b.onclick = ()=>place({...w});
+    li.appendChild(b); resEl.appendChild(li);
+  });
+}
+
+qEl.addEventListener('keydown', e=>{
+  if(!hits.length) return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    cursor = (cursor + (e.key==='ArrowDown'?1:-1) + hits.length) % hits.length;
+    drawHits();
+    resEl.children[cursor]?.firstChild.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter' && cursor>=0){ e.preventDefault(); place(hits[cursor]); }
+});
+
+function place(w){
+  const at = active!=null ? active : slots.findIndex(s=>!s);
+  if(at<0){ tell('아홉 칸이 다 찼습니다. 바꿀 칸을 먼저 고르세요.','err'); return; }
+  slots[at] = w;
+  active = null;
+  sync(at);
+  tell(`${at+1}번 칸에 〈${w.title}〉을 넣었습니다.`);
+}
+function tell(t, tone=''){ msgEl.dataset.tone=tone; msgEl.textContent=t; }
+
+/* ═══════════════════════════════════════════════════════
+   직접 올리기 · 예시
+   ═══════════════════════════════════════════════════════ */
+$('#btnUpload').onclick = ()=>$('#file').click();
+$('#file').onchange = e=>{
+  const files=[...e.target.files];
+  files.forEach(f=>{
+    const at = active!=null && !slots[active] ? active : slots.findIndex(s=>!s);
+    if(at<0) return;
+    slots[at] = { title:f.name.replace(/\.[^.]+$/,''), meta:'직접 올린 표지', src:URL.createObjectURL(f), local:true };
+    active=null; sync(at);
+  });
+  tell(files.length?'표지를 넣었습니다. 제목은 칸을 눌러 파일명 그대로 쓰입니다.':'');
+  e.target.value='';
+};
+$('#btnDemo').onclick = async ()=>{
+  tell('예시를 불러오는 중…');
+  try{
+    const found = (await Promise.all(SOURCE.demo.map(t=>SOURCE.search(t).then(r=>r.items[0]).catch(()=>null)))).filter(Boolean);
+    found.slice(0,9).forEach((w,i)=>slots[i]=w);
+    sync(); tell('예시로 채웠습니다. 마음에 드는 칸만 남기고 바꾸세요.');
+  }catch{ tell('예시를 불러오지 못했습니다. 표지를 직접 올려 살펴보세요.','err'); }
+};
+
+/* ═══════════════════════════════════════════════════════
+   비율 · 캡션 · 띠지
+   ═══════════════════════════════════════════════════════ */
+document.querySelectorAll('.seg button').forEach(b=>{
+  b.onclick = ()=>{
+    ratio = b.dataset.ratio;
+    document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    $('#ratioLabel').textContent = ratio;
+    writeHash();
+  };
+});
+$('#optCaps').onchange = e=>{ caps = e.target.checked; writeHash(); };
+['obiCopy','obiName'].forEach(id=>$('#'+id).addEventListener('input', writeHash));
+$('#btnReset').onclick = ()=>{
+  slots.fill(null); active=null; $('#obiCopy').value=''; $('#obiName').value='';
+  qEl.value=''; hits=[]; drawHits(); sync(); tell('처음 상태로 돌렸습니다.');
+};
+
+/* ═══════════════════════════════════════════════════════
+   공유 주소
+   ═══════════════════════════════════════════════════════ */
+function writeHash(){
+  const p = new URLSearchParams();
+  p.set('w', slots.map(s => s && !s.local ? SOURCE.key + s.id : '').join(','));
+  if($('#obiCopy').value) p.set('c', $('#obiCopy').value);
+  if($('#obiName').value) p.set('n', $('#obiName').value);
+  p.set('r', ratio);
+  const named = {};
+  slots.forEach((s,i)=>{ if(s && !s.local && s.title!==s.origTitle) named[i]=s.title; });
+  if(Object.keys(named).length) p.set('t', JSON.stringify(named));
+  history.replaceState(null,'','#'+p.toString());
+}
+async function readHash(){
+  const p = new URLSearchParams(location.hash.slice(1));
+  if(p.get('c')) $('#obiCopy').value = p.get('c');
+  if(p.get('n')) $('#obiName').value = p.get('n');
+  const pr = p.get('r');
+  if(pr && pr!==ratio) document.querySelector(`[data-ratio="${CSS.escape(pr)}"]`)?.click();
+  /* a123 형태. 숫자만 있는 옛 주소도 이 소스로 읽는다. */
+  const ids = (p.get('w')||'').split(',').map(tok=>{
+    const m = /^([a-z]?)(\d+)$/.exec(tok.trim());
+    if(!m) return NaN;
+    if(m[1] && m[1] !== SOURCE.key) return NaN;      /* 다른 소스의 주소는 건너뛴다 */
+    return parseInt(m[2],10);
+  });
+  const want = ids.filter(Number.isInteger);
+  if(!want.length) return;
+  try{
+    const found = await SOURCE.byIds([...new Set(want)]);
+    const map = Object.fromEntries(found.map(w=>[w.id,w]));
+    ids.forEach((id,i)=>{ if(map[id]) slots[i]={...map[id]}; });
+    try{
+      const named = JSON.parse(p.get('t')||'{}');
+      Object.entries(named).forEach(([i,t])=>{ if(slots[i]) slots[i].title=t; });
+    }catch{}
+    sync();
+  }catch{ tell('공유된 목록을 불러오지 못했습니다.','err'); }
+}
+$('#btnShare').onclick = async ()=>{
+  writeHash();
+  try{ await navigator.clipboard.writeText(location.href); tell('주소를 복사했습니다. 직접 올린 표지는 담기지 않습니다.'); }
+  catch{ tell('복사가 막혔습니다. 주소창의 주소를 그대로 쓰세요.','err'); }
+};
+
+/* ═══════════════════════════════════════════════════════
+   내보내기 — 목차 지면 인쇄
+   ═══════════════════════════════════════════════════════ */
+function loadImg(src, cors){
+  return new Promise(res=>{
+    const im = new Image();
+    if(cors) im.crossOrigin = 'anonymous';
+    im.onload = ()=>res(im);
+    im.onerror = ()=>res(null);
+    im.src = src;
+  });
+}
+let locked = false;                                   /* 캔버스가 잠겼는지 */
+
+async function safeImg(w){
+  if(w.local) return await loadImg(w.src,false);
+  /* 캔버스로 옮기려면 CORS 헤더가 필요하다. 직접 → 프록시 순으로 될 때까지 시도한다. */
+  const direct = await loadImg(w.src, true);
+  if(direct) return direct;
+  for(const p of PROXIES){
+    const im = await loadImg(p(w.src), true);
+    if(im) return im;
+  }
+  /* 다 막히면 권한 없는 그림으로라도 그린다. 지면은 맞게 보이고, 저장 단계에서 걸린다. */
+  const raw = await loadImg(w.src, false);
+  if(raw){ locked = true; return raw; }
+  return null;
+}
+function drawCover(c, im, x, y, w, h){
+  const s = Math.max(w/im.width, h/im.height);
+  const dw = im.width*s, dh = im.height*s;
+  c.save(); c.beginPath(); c.rect(x,y,w,h); c.clip();
+  c.drawImage(im, x+(w-dw)/2, y+(h-dh)/2, dw, dh);
+  c.restore();
+}
+function fitLines(c, text, max, sizes, maxLines){
+  for(const size of sizes){
+    c.font = `700 ${size}px Hahmlet`;
+    if(c.measureText(text).width <= max) return {size, lines:[text]};
+    const words = text.split(/\s+/).filter(Boolean);
+    const byWord = words.length>1 && words.every(w=>c.measureText(w).width<=max);
+    const units = byWord ? words : [...text];
+    const join = byWord ? ' ' : '';
+    const lines = [];
+    let cur = '';
+    for(const u of units){
+      const next = cur ? cur+join+u : u;
+      if(c.measureText(next).width <= max) cur = next;
+      else { if(cur) lines.push(cur); cur = u; }
+    }
+    if(cur) lines.push(cur);
+    if(lines.length <= maxLines) return {size, lines};
+  }
+  const size = sizes[sizes.length-1];
+  c.font = `700 ${size}px Hahmlet`;
+  return {size, lines:[fit(c, text, max, [`700 ${size}px Hahmlet`])]};
+}
+
+function fit(c, text, max, mk){
+  let size = 999, t = text;
+  for(size of mk){ c.font = size; if(c.measureText(t).width<=max) break; }
+  while(c.measureText(t).width>max && t.length>1) t = t.slice(0,-2)+'…';
+  return t;
+}
+
+$('#btnSave').onclick = async ()=>{
+  const btn=$('#btnSave'); btn.disabled=true; tell('지면을 인쇄하는 중…');
+  try{
+    await document.fonts.ready;
+    const W = 2160;
+    const H = ratio==='4:5' ? 2700 : ratio==='2:3' ? 3240 : 2160;
+    const cv = $('#stage'); cv.width=W; cv.height=H;
+    const c = cv.getContext('2d');
+    const INK='#16171B', PULP='#DFD9CB', SPOT='#FF3B5C', LIT='#EBE6DA', FADE='#5B5A55';
+    const M = 104, GAP = 24;
+    locked = false;
+    const imgs = await Promise.all(slots.map(w => w ? safeImg(w) : null));
+    const filled = slots.filter(Boolean).length;
+    const d = new Date();
+    const ymd = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+
+    /* ── 지면 ── */
+    c.fillStyle=PULP; c.fillRect(0,0,W,H);
+    c.strokeStyle=INK; c.lineWidth=3;
+    [[M,M,-1,-1],[W-M,M,1,-1],[M,H-M,-1,1],[W-M,H-M,1,1]].forEach(([tx,ty,dx,dy])=>{
+      c.beginPath(); c.moveTo(tx+dx*44,ty); c.lineTo(tx+dx*10,ty);
+      c.moveTo(tx,ty+dy*44); c.lineTo(tx,ty+dy*10); c.stroke();
+    });
+
+    /* ── 조판 부품 ── */
+    const mast = (x,y,w,h)=>{
+      c.fillStyle=INK; c.fillRect(x,y,w,h);
+      c.textBaseline='middle'; c.textAlign='left';
+      c.fillStyle=PULP; c.font=`500 ${Math.round(h*.37)}px "IBM Plex Mono"`;
+      c.fillText('MY LIFE, MY MANGA', x+22, y+h/2+1);
+      c.fillStyle=SPOT; c.textAlign='right';
+      c.fillText('전 9편', x+w-22, y+h/2+1);
+      c.textAlign='left';
+    };
+    const head = (x,y,w)=>{                        /* 헤드라인 — 폭에 맞춰 조판 */
+      const hs = Math.min(132, Math.round(w*0.105));
+      c.textBaseline='alphabetic'; c.fillStyle=INK; c.font=`900 ${hs}px Hahmlet`;
+      c.fillText('내 인생의 만화', x-4, y+hs*0.78);
+      c.fillStyle=SPOT;
+      c.fillText(' 9', x-4+c.measureText('내 인생의 만화').width, y+hs*0.78);
+      c.fillStyle=FADE; c.font=`italic 400 ${Math.round(hs*0.29)}px "Bodoni Moda"`;
+      c.fillText('Nine that stayed with you.', x, y+hs*1.12);
+      c.fillStyle=INK; c.fillRect(x, y+hs*1.34, w, 5);
+    };
+    const head2 = (x,y,w)=>{                       /* 2단 조판용 — 두 줄로 크게 */
+      const hs = Math.min(116, Math.round(w*0.19));
+      c.textBaseline='alphabetic'; c.textAlign='left';
+      c.fillStyle=INK; c.font=`900 ${hs}px Hahmlet`;
+      c.fillText('내 인생의', x-4, y+hs*0.8);
+      c.fillText('만화', x-4, y+hs*1.78);
+      c.fillStyle=SPOT;
+      c.fillText(' 9', x-4+c.measureText('만화').width, y+hs*1.78);
+      c.fillStyle=FADE; c.font=`italic 400 ${Math.round(hs*0.31)}px "Bodoni Moda"`;
+      c.fillText('Nine that stayed with you.', x, y+hs*2.28);
+      c.fillStyle=INK; c.fillRect(x, y+hs*2.6, w, 5);
+      return y + hs*2.6 + 5;
+    };
+    const cells = (x0,gy,cw,ch,capH)=>{
+      for(let i=0;i<9;i++){
+        const x = x0 + (i%3)*(cw+GAP);
+        const yy = gy + Math.floor(i/3)*(ch+capH+GAP);
+        const w = slots[i];
+        c.fillStyle=LIT; c.fillRect(x,yy,cw,ch);
+        if(w && imgs[i]){
+          drawCover(c, imgs[i], x, yy, cw, ch);
+        }else if(w){                               /* 표지를 못 옮기면 활자 조판으로 */
+          c.fillStyle=LIT; c.fillRect(x,yy,cw,ch);
+          c.fillStyle=SPOT; c.fillRect(x,yy+ch-14,cw,14);
+          c.fillStyle=INK; c.textBaseline='bottom'; c.textAlign='left';
+          c.fillText(fit(c,w.title,cw-44,['900 54px Hahmlet','900 42px Hahmlet','900 32px Hahmlet']), x+22, yy+ch-44);
+        }
+        c.strokeStyle=INK; c.lineWidth=2; c.strokeRect(x+1,yy+1,cw-2,ch-2);
+        c.fillStyle = w?SPOT:INK; c.fillRect(x,yy,70,42);
+        c.fillStyle = w?INK:PULP; c.font='500 23px "IBM Plex Mono"'; c.textBaseline='middle'; c.textAlign='left';
+        c.fillText(String(i+1).padStart(2,'0'), x+15, yy+22);
+        if(capH){
+          c.textBaseline='top'; c.fillStyle=INK;
+          c.fillText(fit(c, w?w.title:'—', cw, ['700 30px Hahmlet','700 25px Hahmlet','700 21px Hahmlet']), x, yy+ch+13);
+          if(w){
+            c.fillStyle=FADE; c.font='400 19px "IBM Plex Mono"';
+            c.fillText(fit(c,w.meta,cw,['400 19px "IBM Plex Mono"','400 16px "IBM Plex Mono"']), x, yy+ch+46);
+          }
+        }
+      }
+    };
+    const contents = (x,y,w,lh)=>{                 /* 목차 — 번호 · 제목 · 이음점 */
+      const num = Math.round(lh*.44), tt = Math.round(lh*.56);
+      slots.forEach((s,i)=>{
+        const ly = y + i*lh + lh/2;
+        c.textBaseline='middle'; c.textAlign='left';
+        c.fillStyle = s?SPOT:'#C6BFAC'; c.font=`500 ${num}px "IBM Plex Mono"`;
+        c.fillText(String(i+1).padStart(2,'0'), x, ly);
+        const tx = x + num*2.1;
+        c.fillStyle = s?INK:'#C6BFAC'; c.font=`700 ${tt}px Hahmlet`;
+        const t = fit(c, s?s.title:'—', w-num*2.1, [`700 ${tt}px Hahmlet`,`700 ${Math.round(tt*.84)}px Hahmlet`]);
+        c.fillText(t, tx, ly);
+        const from = tx + c.measureText(t).width + 12;
+        if(from < x+w-6){
+          c.save(); c.strokeStyle='#C6BFAC'; c.lineWidth=2; c.setLineDash([2,8]);
+          c.beginPath(); c.moveTo(from, ly+tt*.4); c.lineTo(x+w, ly+tt*.4); c.stroke(); c.restore();
+        }
+      });
+    };
+    const obi = (x,y,w,h)=>{                       /* 띠지 — 이 지면의 얼굴 */
+      const stamp = Math.max(64, h*0.55);
+      c.fillStyle=SPOT; c.fillRect(x,y,w,h);
+      c.strokeStyle=INK; c.lineWidth=3; c.strokeRect(x+1.5,y+1.5,w-3,h-3);
+      c.beginPath(); c.moveTo(x+stamp,y); c.lineTo(x+stamp,y+h); c.stroke();
+      c.save(); c.translate(x+stamp/2, y+h/2); c.rotate(Math.PI/2);
+      c.fillStyle=INK; c.font='500 21px "IBM Plex Mono"'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText('OBI · 띠지', 0, 0); c.restore();
+      c.textAlign='left'; c.textBaseline='alphabetic'; c.fillStyle=INK;
+      const copy = $('#obiCopy').value.trim() || '아홉 편이 나를 여기까지 데려왔다';
+      const cx = x + stamp + 28, cwid = w - stamp - 52;
+      const set = fitLines(c, copy, cwid, [58,52,46,40,34,29], 2);
+      const lineH = set.size*1.14, block = set.lines.length*lineH + 34;
+      let ty = y + (h - block)/2 + set.size*0.82;
+      c.font = `700 ${set.size}px Hahmlet`;
+      set.lines.forEach(l=>{ c.fillText(l, cx, ty); ty += lineH; });
+      c.font='400 22px "IBM Plex Mono"';
+      c.fillText(fit(c,'엮은이 '+($('#obiName').value.trim()||'—'),cwid,['400 22px "IBM Plex Mono"']), cx, ty + 6);
+    };
+    const colophon = (x,y,w)=>{
+      c.fillStyle=FADE; c.font='400 21px "IBM Plex Mono"'; c.textBaseline='middle'; c.textAlign='left';
+      c.fillText(`발행 mylifemymanga · ${ymd} · 표지 ${SOURCE.credit}`, x, y);
+      c.textAlign='right'; c.fillText(`${filled}/9`, x+w, y);
+      c.textAlign='left';
+    };
+
+    if(ratio==='1:1'){
+      /* ── 2단 조판: 좌 목차 활자 / 우 표지 그리드 / 띠지는 지면 전체를 감는다 ── */
+      const mh = 62, obiH = 152, colH = 34, gut = 64, clear = 40;
+      const foot = clear + obiH + 32 + colH;             /* 표지 아래 여백까지 확보 */
+      const ch = (H - 2*M - foot - 2*GAP)/3, cw = ch/1.4;
+      const gridH = 3*ch + 2*GAP, gridW = 3*cw + 2*GAP;
+      const gx = W - M - gridW;                    /* 오른쪽 여백을 띠지와 맞춘다 */
+      const Lw = gx - M - gut;
+      cells(gx, M, cw, ch, 0);
+
+      let y = M;
+      mast(M, y, Lw, mh);
+      y = head2(M, y + mh + 46, Lw) + 54;
+      if(caps) contents(M, y, Lw, 58);
+      obi(M, H - M - colH - 32 - obiH, W - 2*M, obiH);
+      colophon(M, H - M - colH/2, W - 2*M);
+    }else{
+      /* ── 통단 조판 ── */
+      const capH = caps ? 66 : 0;
+      const mh = 74, obiH = 158, colH = 38;
+      const vMast = 52, vObi = 44, vCol = 26, headH = 232;
+      const availH = H - 2*M - mh - headH - obiH - colH - vMast - vObi - vCol;
+      let ch = (availH - 2*GAP - 3*capH)/3;
+      const cw = Math.min(ch/1.4, (W - 2*M - 2*GAP)/3);
+      ch = cw*1.4;
+      const gridH = 3*ch + 2*GAP + 3*capH;
+      const gwid = 3*cw + 2*GAP, x0 = (W-gwid)/2;
+      const contentH = mh+vMast+headH+gridH+vObi+obiH+vCol+colH;
+      let y = Math.max(M, (H-contentH)/2);
+      mast(x0, y, gwid, mh); y += mh + vMast;
+      head(x0, y, gwid); y += headH;
+      cells(x0, y, cw, ch, capH); y += gridH + vObi;
+      obi(x0, y, gwid, obiH); y += obiH + vCol;
+      colophon(x0, y + colH/2, gwid);
+    }
+
+    /* 내려받기 */
+    let url;
+    try{
+      url = cv.toDataURL('image/png');
+    }catch(err){
+      tell(locked
+        ? '표지를 이미지로 옮길 권한이 없어 저장이 막혔습니다. 파일을 직접 열지 않고 배포한 주소에서 열면 /api/cover 를 거쳐 해결됩니다.'
+        : '이미지로 만드는 중에 막혔습니다. 새로 고침한 뒤 다시 시도해 보세요.', 'err');
+      return;
+    }
+    const a = document.createElement('a');
+    a.href=url; a.download=`내인생의만화9_${ymd.replace(/\./g,'')}_${ratio.replace(':','x')}.png`;
+    a.click();
+    const lost = slots.filter((s,i)=>s && !imgs[i]).length;
+    tell(lost ? `이미지를 저장했습니다. ${lost}칸은 표지를 옮기지 못해 제목만 넣었습니다 — 그 칸은 표지를 직접 올리면 해결됩니다.`
+              : '이미지를 저장했습니다.');
+  }catch(err){
+    console.error(err);
+    tell('표지 일부를 이미지로 옮길 수 없었습니다. 그 칸은 표지를 직접 올려 다시 저장해 보세요.','err');
+  }finally{ btn.disabled = slots.filter(Boolean).length===0; }
+};
+
+/* ═══════════════════════════════════════════════════════
+   시작
+   ═══════════════════════════════════════════════════════ */
+function applyFrame(){                                  /* 소스가 바뀌면 이 문안만 따라 바뀐다 */
+  $('.find__label').textContent = SOURCE.label;
+  qEl.placeholder = SOURCE.placeholder;
+  document.querySelectorAll('[data-credit]').forEach(el=>el.textContent = SOURCE.credit);
+}
+applyFrame();
+sync();
+readHash();
+</script>
+</body>
+</html>
