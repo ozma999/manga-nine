@@ -29,7 +29,7 @@
   --kr-display: 'Hahmlet', serif;
   --lt-display: 'Bodoni Moda', serif;
   --ui:         'IBM Plex Sans KR', system-ui, sans-serif;
-  --data:       'IBM Plex Mono', ui-monospace, monospace;
+  --data:       'IBM Plex Mono', 'IBM Plex Sans KR', ui-monospace, monospace;
 
   --hair: 1px solid var(--ink);
   --pad: clamp(14px, 2.2vw, 26px);
@@ -131,6 +131,12 @@ button{ font:inherit; color:inherit; cursor:pointer }
 .hit__title{ font-weight:500; font-size:13.5px; line-height:1.3; overflow-wrap:anywhere }
 .hit__meta{ font-family:var(--data); font-size:10.5px; color:var(--ink-soft); margin-top:2px }
 .hit__add{ font-family:var(--data); font-size:16px; color:var(--spot) }
+.hit__by{
+  border:0; background:transparent; padding:0; font:inherit; color:var(--ink);
+  text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px;
+}
+.hit__by:hover:not(:disabled){ color:var(--spot) }
+.hit__by:disabled{ color:var(--ink-soft); text-decoration:none; cursor:default }
 
 /* ── 직접 올리기 ──────────────────────────── */
 .upload{ margin-top:16px; border-top:var(--hair); padding-top:14px }
@@ -182,7 +188,7 @@ button{ font:inherit; color:inherit; cursor:pointer }
 /* 표지 못 불러오면 활자 조판으로 대체 */
 .slot__type{
   position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end;
-  padding:10px; text-align:left; background:var(--ink); color:var(--pulp);
+  padding:10px 10px 34px; text-align:left; background:var(--ink); color:var(--pulp);
 }
 .slot__type b{ font-family:var(--kr-display); font-weight:900; font-size:clamp(13px,1.5vw,19px); line-height:1.05 }
 .slot__type span{ font-family:var(--data); font-size:10px; color:var(--spot); margin-top:6px }
@@ -223,6 +229,13 @@ button{ font:inherit; color:inherit; cursor:pointer }
 .obi__copy{ font-weight:700; font-size:clamp(16px,2vw,23px); line-height:1.2 }
 .obi__name{ font-family:var(--data); font-size:11px; letter-spacing:.12em; text-transform:uppercase }
 .obi__copy::placeholder,.obi__name::placeholder{ color:rgba(22,23,27,.45) }
+.obi__foot{ display:flex; align-items:baseline; gap:10px }
+.obi__foot .obi__name{ flex:1; min-width:0 }
+.obi__count{
+  font-family:var(--data); font-size:10.5px; letter-spacing:.08em;
+  color:rgba(22,23,27,.6); white-space:nowrap;
+}
+.obi__count[data-full="true"]{ color:var(--ink); font-weight:500 }
 .obi__copy:focus,.obi__name:focus{ outline:none; background:rgba(255,255,255,.28) }
 
 /* ── 내보내기 ─────────────────────────────── */
@@ -283,12 +296,12 @@ button{ font:inherit; color:inherit; cursor:pointer }
                role="combobox" aria-expanded="false" aria-controls="results" aria-autocomplete="list">
         <button class="find__clear" id="qClear" type="button" aria-label="검색어 지우기" hidden>&times;</button>
       </div>
-      <p class="find__state" id="findState" role="status">제목과 작가 이름 모두, 한국어 · 영어 · 원어로 찾습니다.</p>
+      <p class="find__state" id="findState" role="status">제목과 작가 이름으로 찾습니다. 결과의 작가 이름을 누르면 그 작가의 작품이 모입니다.</p>
       <ul class="results" id="results" role="listbox" aria-label="검색 결과"></ul>
     </div>
 
     <div class="upload">
-      <p class="upload__hint">검색에 없는 작품은 표지 파일을 직접 올려 넣으세요. 국내 독점 웹툰은 대체로 이쪽입니다.</p>
+      <p class="upload__hint">검색에 없는 작품은 표지 파일을 직접 올려 넣으세요. 국내 독점 웹툰은 대체로 이쪽입니다. 올린 표지도 저장 이미지에 그대로 들어갑니다.</p>
       <div class="btn-row">
         <button class="btn" id="btnUpload" type="button">표지 올리기</button>
         <button class="btn" id="btnDemo" type="button">예시로 채우기</button>
@@ -309,8 +322,11 @@ button{ font:inherit; color:inherit; cursor:pointer }
     <div class="obi">
       <span class="obi__stamp">띠지 / OBI</span>
       <div class="obi__fields">
-        <input class="obi__copy" id="obiCopy" maxlength="35" placeholder="여기에 한 줄 — 이 아홉 편이 나에게 무엇이었는지">
-        <input class="obi__name" id="obiName" maxlength="26" placeholder="엮은이 이름">
+        <input class="obi__copy" id="obiCopy" maxlength="42" placeholder="여기에 한 줄 — 이 아홉 편이 나에게 무엇이었는지">
+        <div class="obi__foot">
+          <input class="obi__name" id="obiName" maxlength="26" placeholder="엮은이 이름">
+          <span class="obi__count" id="obiCount" aria-live="polite">0 / 42</span>
+        </div>
       </div>
     </div>
 
@@ -437,7 +453,7 @@ const AniList = (() => {
   const FRAG = `fragment F on Media {
     id title{romaji english native} synonyms format countryOfOrigin
     startDate{year} coverImage{extraLarge large}
-    staff(perPage:2){ nodes{ name{ full native } } }
+    staff(perPage:2){ nodes{ id name{ full native } } }
   }`;
   function buildQuery(titleTerms, staffTerms){
     const parts = [], vars = {};
@@ -482,11 +498,16 @@ const AniList = (() => {
     return en || ro || na;                                     /* 4. 남는 것 */
   };
   const packWork = m => {
-    const by = (m.staff?.nodes||[]).map(s=>krName(s.name)).filter(Boolean)[0] || '';
+    const first = (m.staff?.nodes||[]).find(s=>krName(s.name));
+    const by = first ? krName(first.name) : '';
+    const byId = first ? first.id : null;
     const t = titleOf(m);
+    const kind = kindOf(m);
     return {
-      id:m.id, title:t, origTitle:t, by,
-      meta:[kindOf(m), m.startDate?.year, by].filter(Boolean).join(' · '),
+      id:m.id, title:t, origTitle:t, by, byId, kind,
+      year: m.startDate?.year || '',
+      /* 아홉 편이 다 만화일 때 '만화'를 아홉 번 적는 건 정보가 아니다. 예외만 남긴다. */
+      meta:[kind==='만화'?null:kind, m.startDate?.year, by].filter(Boolean).join(' · '),
       src:m.coverImage.extraLarge || m.coverImage.large
     };
   };
@@ -521,6 +542,33 @@ const AniList = (() => {
     return { items: out.slice(0,24), guessed };
   }
 
+  /* 이름 검색이 안 걸리는 작가는 작품에서 건너간다. ID는 색인과 무관하게 정확하다. */
+  async function byStaffId(id){
+    const d = await gql(`query($id:Int){ Staff(id:$id){ name{ full native }
+      staffMedia(sort:POPULARITY_DESC, perPage:24){ nodes{ ...F } } } }\n${FRAG}`, {id});
+    const who = krName(d.Staff?.name);
+    const items = (d.Staff?.staffMedia?.nodes || []).filter(hasCover).map(packWork);
+    items.forEach(w=>{ if(!w.by) w.by = who; });
+    return { items, who };
+  }
+
+  /* 예시 채우기 전용. 아홉 편을 한 번의 요청으로 받는다. */
+  async function sample(terms){
+    const parts = [], vars = {};
+    terms.forEach((t,i)=>{
+      vars['q'+i] = t;
+      parts.push(`q${i}: Page(perPage:1){ media(search:$q${i}, sort:[SEARCH_MATCH,POPULARITY_DESC], isAdult:false){ ...F } }`);
+    });
+    const decl = Object.keys(vars).map(k=>`$${k}:String`).join(',');
+    const d = await gql(`query(${decl}){\n${parts.join('\n')}\n}\n${FRAG}`, vars);
+    const out = [], seen = new Set();
+    terms.forEach((_,i)=>{
+      const m = (d['q'+i]?.media || []).filter(hasCover)[0];
+      if(m && !seen.has(m.id)){ seen.add(m.id); out.push(packWork(m)); }
+    });
+    return out;
+  }
+
   async function byIds(ids){
     if(!ids.length) return [];
     const d = await gql(`query($ids:[Int]){Page(perPage:50){media(id_in:$ids){...F}}}\n${FRAG}`,{ids});
@@ -531,9 +579,10 @@ const AniList = (() => {
     key: 'a',                            /* 공유 주소에 붙는 소스 표시 */
     credit: 'AniList',
     label: '검색 — 작품 제목 또는 작가 이름',
-    placeholder: '슬램덩크 · One Piece · 이노우에 다케히코 · 박태준',
+    placeholder: '슬램덩크 · One Piece · 이노우에 다케히코 · 232',
     demo: DEMO,
-    search, byIds
+    demoPool: [...new Set([...DEMO, ...Object.values(ALIAS)])],
+    search, byIds, byStaffId, sample
   };
 })();
 
@@ -565,7 +614,11 @@ function renderGrid(justFilled){
                                    : `${i+1}번 칸 비어 있음. 누르면 이 칸을 고릅니다.`);
     b.innerHTML = `<span class="slot__folio">${String(i+1).padStart(2,'0')}</span>`;
 
-    if(w){
+    if(w && !w.src){                                   /* 표지 없이 제목만 있는 칸 */
+      b.insertAdjacentHTML('beforeend',
+        `<span class="slot__type"><b>${esc(w.title)}</b><span>표지 없음</span></span>`);
+    }
+    if(w && w.src){
       const img = new Image();
       img.className='slot__img'; img.alt=''; img.loading='lazy';
       img.referrerPolicy='no-referrer';              /* 표시용은 CORS를 걸지 않는다 */
@@ -573,6 +626,8 @@ function renderGrid(justFilled){
       img.onerror = ()=>{ img.remove(); b.insertAdjacentHTML('beforeend',
         `<span class="slot__type"><b>${esc(w.title)}</b><span>표지 없음</span></span>`); };
       b.appendChild(img);
+    }
+    if(w){
       const cap = document.createElement('input');
       cap.className='slot__cap'; cap.value=w.title; cap.maxLength=44;
       cap.setAttribute('aria-label', `${i+1}번 칸 제목`);
@@ -636,7 +691,7 @@ qEl.addEventListener('input', ()=>{
       const also = guessed.length ? ` ${guessed.slice(0,2).join(', ')}(으)로도 찾았습니다.` : '';
       stateEl.textContent = items.length
         ? `${items.length}편 찾았습니다. 누르면 칸에 들어갑니다.${also}`
-        : '못 찾았습니다. 원제나 영어 표기로 바꿔보시거나 표지를 직접 올리세요.';
+        : '못 찾았습니다. 작가 이름이 안 걸리면 대표작을 검색한 뒤 결과에 뜬 작가 이름을 눌러보세요.';
     }catch(err){
       if(my!==seq) return;
       hits=[]; drawHits();
@@ -652,13 +707,25 @@ function drawHits(){
   qEl.setAttribute('aria-expanded', String(hits.length>0));
   hits.forEach((w,n)=>{
     const li=document.createElement('li'); li.setAttribute('role','none');
-    const b=document.createElement('button');
-    b.type='button'; b.className='hit'; b.setAttribute('role','option');
+    const b=document.createElement('div');
+    b.className='hit'; b.setAttribute('role','option'); b.tabIndex=-1;
     b.setAttribute('aria-selected', String(n===cursor));
+    const head = [w.kind, w.year].filter(Boolean).join(' · ');
     b.innerHTML = `<img class="hit__cover" src="${w.src}" alt="" loading="lazy" referrerpolicy="no-referrer">
-      <span><span class="hit__title">${esc(w.title)}</span><span class="hit__meta">${esc(w.meta)}</span></span>
+      <span><span class="hit__title">${esc(w.title)}</span><span class="hit__meta">${esc(head)}</span></span>
       <span class="hit__add" aria-hidden="true">＋</span>`;
     b.onclick = ()=>place({...w});
+
+    if(w.by){                                     /* 작가 이름을 누르면 그 작가의 작품으로 */
+      const meta = b.querySelector('.hit__meta');
+      meta.append(head ? ' · ' : '');
+      const by = document.createElement('button');
+      by.type='button'; by.className='hit__by'; by.textContent = w.by;
+      by.title = `${w.by}의 다른 작품 보기`;
+      by.onclick = e=>{ e.stopPropagation(); if(w.byId) fromStaff(w.byId, w.by); };
+      if(!w.byId) by.disabled = true;
+      meta.append(by);
+    }
     li.appendChild(b); resEl.appendChild(li);
   });
 }
@@ -672,6 +739,21 @@ qEl.addEventListener('keydown', e=>{
     resEl.children[cursor]?.firstChild.scrollIntoView({block:'nearest'});
   }else if(e.key==='Enter' && cursor>=0){ e.preventDefault(); place(hits[cursor]); }
 });
+
+async function fromStaff(id, who){
+  stateEl.dataset.tone=''; stateEl.textContent = `${who}의 작품을 불러오는 중…`;
+  try{
+    const { items } = await SOURCE.byStaffId(id);
+    hits = items; cursor = -1; drawHits();
+    qEl.value = who; $('#qClear').hidden = false;
+    stateEl.textContent = items.length
+      ? `${who}의 작품 ${items.length}편입니다. 누르면 칸에 들어갑니다.`
+      : `${who}의 작품을 찾지 못했습니다.`;
+    resEl.scrollTop = 0;
+  }catch{
+    stateEl.dataset.tone='err'; stateEl.textContent = '작가의 작품을 불러오지 못했습니다.';
+  }
+}
 
 function place(w){
   const at = active!=null ? active : slots.findIndex(s=>!s);
@@ -692,19 +774,34 @@ $('#file').onchange = e=>{
   files.forEach(f=>{
     const at = active!=null && !slots[active] ? active : slots.findIndex(s=>!s);
     if(at<0) return;
-    slots[at] = { title:f.name.replace(/\.[^.]+$/,''), meta:'직접 올린 표지', src:URL.createObjectURL(f), local:true };
+    const nm = f.name.replace(/\.[^.]+$/,'');
+    /* meta를 비워 저장 이미지에는 제목만 남긴다. 올린 표지도 다른 칸과 똑같이 보여야 한다. */
+    slots[at] = { title:nm, origTitle:nm, meta:'', year:'', src:URL.createObjectURL(f), local:true };
     active=null; sync(at);
   });
   tell(files.length?'표지를 넣었습니다. 제목은 칸을 눌러 파일명 그대로 쓰입니다.':'');
   e.target.value='';
 };
+let demoRun = 0;
+const shuffle = a => { const r=[...a]; for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]]; } return r; };
+
 $('#btnDemo').onclick = async ()=>{
-  tell('예시를 불러오는 중…');
+  const btn = $('#btnDemo'); btn.disabled = true;
+  tell(demoRun ? '다른 아홉 편을 뽑는 중…' : '예시를 불러오는 중…');
   try{
-    const found = (await Promise.all(SOURCE.demo.map(t=>SOURCE.search(t).then(r=>r.items[0]).catch(()=>null)))).filter(Boolean);
+    /* 처음은 정해진 아홉 편, 두 번째부터는 사전 전체에서 무작위로 */
+    const terms = demoRun === 0 ? SOURCE.demo : shuffle(SOURCE.demoPool).slice(0, 9);
+    const found = await SOURCE.sample(terms);
+    if(!found.length){ tell('예시를 불러오지 못했습니다.','err'); return; }
+    slots.fill(null);
     found.slice(0,9).forEach((w,i)=>slots[i]=w);
-    sync(); tell('예시로 채웠습니다. 마음에 드는 칸만 남기고 바꾸세요.');
-  }catch{ tell('예시를 불러오지 못했습니다. 표지를 직접 올려 살펴보세요.','err'); }
+    active = null; sync();
+    demoRun++;
+    tell(demoRun > 1 ? '다시 뽑았습니다. 한 번 더 누르면 또 바뀝니다.'
+                     : '예시로 채웠습니다. 다시 누르면 다른 아홉 편으로 바뀝니다.');
+  }catch{
+    tell('예시를 불러오지 못했습니다. 표지를 직접 올려 살펴보세요.','err');
+  }finally{ btn.disabled = false; }
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -719,55 +816,85 @@ document.querySelectorAll('.seg button').forEach(b=>{
   };
 });
 $('#optCaps').onchange = e=>{ caps = e.target.checked; writeHash(); };
-['obiCopy','obiName'].forEach(id=>$('#'+id).addEventListener('input', writeHash));
+function countObi(){
+  const n = [...$('#obiCopy').value].length;               /* 한글·이모지 모두 한 글자로 센다 */
+  const el = $('#obiCount');
+  el.textContent = `${n} / 42`;
+  el.dataset.full = String(n >= 42);
+}
+['obiCopy','obiName'].forEach(id=>$('#'+id).addEventListener('input', ()=>{ countObi(); writeHash(); }));
 $('#btnReset').onclick = ()=>{
-  slots.fill(null); active=null; $('#obiCopy').value=''; $('#obiName').value='';
+  slots.fill(null); active=null; $('#obiCopy').value=''; $('#obiName').value=''; countObi();
   qEl.value=''; hits=[]; drawHits(); sync(); tell('처음 상태로 돌렸습니다.');
 };
 
 /* ═══════════════════════════════════════════════════════
    공유 주소
    ═══════════════════════════════════════════════════════ */
+/* 들어온 주소를 먼저 붙잡아 둔다. sync()가 즉시 writeHash를 부르기 때문에
+   그 전에 읽어두지 않으면 공유받은 해시가 빈 값으로 덮인다. */
+const BOOT = new URLSearchParams(location.hash.slice(1));
+let ready = false;
+
 function writeHash(){
+  if(!ready) return;                                  /* 복원이 끝나기 전에는 쓰지 않는다 */
   const p = new URLSearchParams();
-  p.set('w', slots.map(s => s && !s.local ? SOURCE.key + s.id : '').join(','));
+  p.set('w', slots.map(s => !s ? '' : s.local ? 'u' : SOURCE.key + s.id).join(','));
+  p.set('k', caps ? '1' : '0');
   if($('#obiCopy').value) p.set('c', $('#obiCopy').value);
   if($('#obiName').value) p.set('n', $('#obiName').value);
   p.set('r', ratio);
-  const named = {};
-  slots.forEach((s,i)=>{ if(s && !s.local && s.title!==s.origTitle) named[i]=s.title; });
+  const named = {};                                     /* 고친 제목과 올린 칸의 제목 */
+  slots.forEach((s,i)=>{ if(s && (s.local || s.title!==s.origTitle)) named[i]=s.title; });
   if(Object.keys(named).length) p.set('t', JSON.stringify(named));
   history.replaceState(null,'','#'+p.toString());
 }
 async function readHash(){
-  const p = new URLSearchParams(location.hash.slice(1));
-  if(p.get('c')) $('#obiCopy').value = p.get('c');
+  try{
+    await restore(BOOT);
+  } finally {
+    ready = true;                                     /* 이제부터 주소를 갱신한다 */
+    writeHash();
+  }
+}
+
+async function restore(p){
+  if(p.get('c')){ $('#obiCopy').value = p.get('c'); countObi(); }
   if(p.get('n')) $('#obiName').value = p.get('n');
   const pr = p.get('r');
   if(pr && pr!==ratio) document.querySelector(`[data-ratio="${CSS.escape(pr)}"]`)?.click();
-  /* a123 형태. 숫자만 있는 옛 주소도 이 소스로 읽는다. */
-  const ids = (p.get('w')||'').split(',').map(tok=>{
+  if(p.get('k')==='0'){ caps = false; $('#optCaps').checked = false; }
+
+  let named = {};
+  try{ named = JSON.parse(p.get('t')||'{}'); }catch{}
+
+  /* a123 = 소스의 작품, u = 올린 표지(그림은 못 담으니 제목만), 빈칸 = 비어 있음 */
+  const tokens = (p.get('w')||'').split(',');
+  const ids = tokens.map(tok=>{
     const m = /^([a-z]?)(\d+)$/.exec(tok.trim());
     if(!m) return NaN;
     if(m[1] && m[1] !== SOURCE.key) return NaN;      /* 다른 소스의 주소는 건너뛴다 */
     return parseInt(m[2],10);
   });
+
+  tokens.forEach((tok,i)=>{                          /* 올린 칸은 활자 카드로 되살린다 */
+    if(tok.trim()==='u')                             /* local 표시가 있어야 다시 공유해도 'u'로 기록된다 */
+      slots[i] = { title: named[i] || '제목 없음', origTitle:'', meta:'', year:'', src:'', local:true };
+  });
+
   const want = ids.filter(Number.isInteger);
-  if(!want.length) return;
+  if(!want.length){ if(tokens.some(t=>t.trim()==='u')) sync(); return; }
   try{
     const found = await SOURCE.byIds([...new Set(want)]);
     const map = Object.fromEntries(found.map(w=>[w.id,w]));
     ids.forEach((id,i)=>{ if(map[id]) slots[i]={...map[id]}; });
-    try{
-      const named = JSON.parse(p.get('t')||'{}');
-      Object.entries(named).forEach(([i,t])=>{ if(slots[i]) slots[i].title=t; });
-    }catch{}
+    Object.entries(named).forEach(([i,t])=>{ if(slots[i]) slots[i].title=t; });
     sync();
   }catch{ tell('공유된 목록을 불러오지 못했습니다.','err'); }
 }
 $('#btnShare').onclick = async ()=>{
   writeHash();
-  try{ await navigator.clipboard.writeText(location.href); tell('주소를 복사했습니다. 직접 올린 표지는 담기지 않습니다.'); }
+  try{ await navigator.clipboard.writeText(location.href); tell('주소를 복사했습니다. 아홉 편과 띠지 문안, 비율까지 그대로 열립니다. 직접 올린 표지는 그림 대신 제목만 전달됩니다.'); }
   catch{ tell('복사가 막혔습니다. 주소창의 주소를 그대로 쓰세요.','err'); }
 };
 
@@ -786,6 +913,7 @@ function loadImg(src, cors){
 let locked = false;                                   /* 캔버스가 잠겼는지 */
 
 async function safeImg(w){
+  if(!w.src) return null;
   if(w.local) return await loadImg(w.src,false);
   /* 캔버스로 옮기려면 CORS 헤더가 필요하다. 직접 → 프록시 순으로 될 때까지 시도한다. */
   const direct = await loadImg(w.src, true);
@@ -806,6 +934,16 @@ function drawCover(c, im, x, y, w, h){
   c.drawImage(im, x+(w-dw)/2, y+(h-dh)/2, dw, dh);
   c.restore();
 }
+/* 띠지 문안은 한 줄을 우선한다. 글자가 늘면 크기를 낮춰 한 줄에 앉히고,
+   27px에서도 안 들어갈 때만 두 줄로 넘긴다. */
+function fitObi(c, text, max){
+  for(const size of [58,54,50,46,42,38,34,30,27]){
+    c.font = `700 ${size}px Hahmlet`;
+    if(c.measureText(text).width <= max) return {size, lines:[text]};
+  }
+  return fitLines(c, text, max, [46,40,34,29], 2);
+}
+
 function fitLines(c, text, max, sizes, maxLines){
   for(const size of sizes){
     c.font = `700 ${size}px Hahmlet`;
@@ -864,7 +1002,7 @@ $('#btnSave').onclick = async ()=>{
     const mast = (x,y,w,h)=>{
       c.fillStyle=INK; c.fillRect(x,y,w,h);
       c.textBaseline='middle'; c.textAlign='left';
-      c.fillStyle=PULP; c.font=`500 ${Math.round(h*.37)}px "IBM Plex Mono"`;
+      c.fillStyle=PULP; c.font=`500 ${Math.round(h*.37)}px "IBM Plex Mono","IBM Plex Sans KR"`;
       c.fillText('MY LIFE, MY MANGA', x+22, y+h/2+1);
       c.fillStyle=SPOT; c.textAlign='right';
       c.fillText('전 9편', x+w-22, y+h/2+1);
@@ -908,58 +1046,70 @@ $('#btnSave').onclick = async ()=>{
           c.fillText(fit(c,w.title,cw-44,['900 54px Hahmlet','900 42px Hahmlet','900 32px Hahmlet']), x+22, yy+ch-44);
         }
         c.strokeStyle=INK; c.lineWidth=2; c.strokeRect(x+1,yy+1,cw-2,ch-2);
-        c.fillStyle = w?SPOT:INK; c.fillRect(x,yy,70,42);
-        c.fillStyle = w?INK:PULP; c.font='500 23px "IBM Plex Mono"'; c.textBaseline='middle'; c.textAlign='left';
-        c.fillText(String(i+1).padStart(2,'0'), x+15, yy+22);
+        c.fillStyle = w?SPOT:INK; c.fillRect(x,yy,62,38);
+        c.fillStyle = w?INK:PULP; c.font='500 21px "IBM Plex Mono","IBM Plex Sans KR"'; c.textBaseline='middle'; c.textAlign='left';
+        c.fillText(String(i+1).padStart(2,'0'), x+14, yy+20);
         if(capH){
           c.textBaseline='top'; c.fillStyle=INK;
           c.fillText(fit(c, w?w.title:'—', cw, ['700 30px Hahmlet','700 25px Hahmlet','700 21px Hahmlet']), x, yy+ch+13);
           if(w){
-            c.fillStyle=FADE; c.font='400 19px "IBM Plex Mono"';
-            c.fillText(fit(c,w.meta,cw,['400 19px "IBM Plex Mono"','400 16px "IBM Plex Mono"']), x, yy+ch+46);
+            c.fillStyle=FADE; c.font='400 19px "IBM Plex Mono","IBM Plex Sans KR"';
+            c.fillText(fit(c,w.meta,cw,['400 19px "IBM Plex Mono","IBM Plex Sans KR"','400 16px "IBM Plex Mono","IBM Plex Sans KR"']), x, yy+ch+46);
           }
         }
       }
     };
     const contents = (x,y,w,lh)=>{                 /* 목차 — 번호 · 제목 · 이음점 */
-      const num = Math.round(lh*.44), tt = Math.round(lh*.56);
+      const NUM = 24, TT = 36, YR = 21;
+      const mono = (wt,s) => `${wt} ${s}px "IBM Plex Mono","IBM Plex Sans KR"`;
       slots.forEach((s,i)=>{
         const ly = y + i*lh + lh/2;
         c.textBaseline='middle'; c.textAlign='left';
-        c.fillStyle = s?SPOT:'#C6BFAC'; c.font=`500 ${num}px "IBM Plex Mono"`;
+        c.fillStyle = s?SPOT:'#C6BFAC'; c.font=mono(500,NUM);
         c.fillText(String(i+1).padStart(2,'0'), x, ly);
-        const tx = x + num*2.1;
-        c.fillStyle = s?INK:'#C6BFAC'; c.font=`700 ${tt}px Hahmlet`;
-        const t = fit(c, s?s.title:'—', w-num*2.1, [`700 ${tt}px Hahmlet`,`700 ${Math.round(tt*.84)}px Hahmlet`]);
+
+        const tail = s ? String(s.year||'') : '';
+        c.font = mono(400,YR);
+        const tailW = tail ? c.measureText(tail).width : 0;
+        const tx = x + NUM*2.2, room = w - NUM*2.2 - tailW - (tail?30:0);
+
+        c.fillStyle = s?INK:'#C6BFAC'; c.font=`700 ${TT}px Hahmlet`;
+        const t = fit(c, s?s.title:'—', room, [`700 ${TT}px Hahmlet`,`700 ${Math.round(TT*.82)}px Hahmlet`]);
         c.fillText(t, tx, ly);
-        const from = tx + c.measureText(t).width + 12;
-        if(from < x+w-6){
-          c.save(); c.strokeStyle='#C6BFAC'; c.lineWidth=2; c.setLineDash([2,8]);
-          c.beginPath(); c.moveTo(from, ly+tt*.4); c.lineTo(x+w, ly+tt*.4); c.stroke(); c.restore();
+
+        const from = tx + c.measureText(t).width + 14;
+        const to = x + w - tailW - (tail?14:0);
+        if(to - from > 16){                       /* 이음점은 반드시 무언가에 닿아야 한다 */
+          c.save(); c.strokeStyle='#C6BFAC'; c.lineWidth=2; c.setLineDash([2,9]);
+          c.beginPath(); c.moveTo(from, ly+7); c.lineTo(to, ly+7); c.stroke(); c.restore();
+        }
+        if(tail){
+          c.fillStyle=FADE; c.font=mono(400,YR); c.textAlign='right';
+          c.fillText(tail, x+w, ly+2); c.textAlign='left';
         }
       });
     };
     const obi = (x,y,w,h)=>{                       /* 띠지 — 이 지면의 얼굴 */
-      const stamp = Math.max(64, h*0.55);
+      const stamp = 58;                            /* 세로 도장 폭을 줄여 문안 자리를 넓힌다 */
       c.fillStyle=SPOT; c.fillRect(x,y,w,h);
       c.strokeStyle=INK; c.lineWidth=3; c.strokeRect(x+1.5,y+1.5,w-3,h-3);
       c.beginPath(); c.moveTo(x+stamp,y); c.lineTo(x+stamp,y+h); c.stroke();
       c.save(); c.translate(x+stamp/2, y+h/2); c.rotate(Math.PI/2);
-      c.fillStyle=INK; c.font='500 21px "IBM Plex Mono"'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillStyle=INK; c.font='500 21px "IBM Plex Mono","IBM Plex Sans KR"'; c.textAlign='center'; c.textBaseline='middle';
       c.fillText('OBI · 띠지', 0, 0); c.restore();
       c.textAlign='left'; c.textBaseline='alphabetic'; c.fillStyle=INK;
       const copy = $('#obiCopy').value.trim() || '아홉 편이 나를 여기까지 데려왔다';
-      const cx = x + stamp + 28, cwid = w - stamp - 52;
-      const set = fitLines(c, copy, cwid, [58,52,46,40,34,29], 2);
-      const lineH = set.size*1.14, block = set.lines.length*lineH + 34;
+      const cx = x + stamp + 24, cwid = w - stamp - 44;
+      const set = fitObi(c, copy, cwid);
+      const lineH = set.size*1.14, block = set.lines.length*lineH + 42;
       let ty = y + (h - block)/2 + set.size*0.82;
       c.font = `700 ${set.size}px Hahmlet`;
       set.lines.forEach(l=>{ c.fillText(l, cx, ty); ty += lineH; });
-      c.font='400 22px "IBM Plex Mono"';
-      c.fillText(fit(c,'엮은이 '+($('#obiName').value.trim()||'—'),cwid,['400 22px "IBM Plex Mono"']), cx, ty + 6);
+      c.font='400 22px "IBM Plex Mono","IBM Plex Sans KR"';
+      c.fillText(fit(c,'엮은이 '+($('#obiName').value.trim()||'—'),cwid,['400 22px "IBM Plex Mono","IBM Plex Sans KR"']), cx, ty + 14);
     };
     const colophon = (x,y,w)=>{
-      c.fillStyle=FADE; c.font='400 21px "IBM Plex Mono"'; c.textBaseline='middle'; c.textAlign='left';
+      c.fillStyle=FADE; c.font='400 21px "IBM Plex Mono","IBM Plex Sans KR"'; c.textBaseline='middle'; c.textAlign='left';
       c.fillText(`발행 mylifemymanga · ${ymd} · 표지 ${SOURCE.credit}`, x, y);
       c.textAlign='right'; c.fillText(`${filled}/9`, x+w, y);
       c.textAlign='left';
@@ -977,9 +1127,12 @@ $('#btnSave').onclick = async ()=>{
 
       let y = M;
       mast(M, y, Lw, mh);
-      y = head2(M, y + mh + 46, Lw) + 54;
-      if(caps) contents(M, y, Lw, 58);
-      obi(M, H - M - colH - 32 - obiH, W - 2*M, obiH);
+      y = head2(M, y + mh + 46, Lw) + 58;
+      const obiTop = H - M - colH - 32 - obiH;
+      if(caps){                                   /* 남는 단을 목차가 고르게 채운다 */
+        contents(M, y, Lw, Math.max(60, Math.min(104, (obiTop - 48 - y)/9)));
+      }
+      obi(M, obiTop, W - 2*M, obiH);
       colophon(M, H - M - colH/2, W - 2*M);
     }else{
       /* ── 통단 조판 ── */
@@ -994,11 +1147,11 @@ $('#btnSave').onclick = async ()=>{
       const gwid = 3*cw + 2*GAP, x0 = (W-gwid)/2;
       const contentH = mh+vMast+headH+gridH+vObi+obiH+vCol+colH;
       let y = Math.max(M, (H-contentH)/2);
-      mast(x0, y, gwid, mh); y += mh + vMast;
-      head(x0, y, gwid); y += headH;
+      mast(M, y, W - 2*M, mh); y += mh + vMast;    /* 띠지와 한 선에서 끊는다 */
+      head(M, y, W - 2*M); y += headH;
       cells(x0, y, cw, ch, capH); y += gridH + vObi;
-      obi(x0, y, gwid, obiH); y += obiH + vCol;
-      colophon(x0, y + colH/2, gwid);
+      obi(M, y, W - 2*M, obiH); y += obiH + vCol;    /* 띠지는 판면 전체를 감는다 */
+      colophon(M, y + colH/2, W - 2*M);
     }
 
     /* 내려받기 */
@@ -1032,6 +1185,7 @@ function applyFrame(){                                  /* 소스가 바뀌면 �
   document.querySelectorAll('[data-credit]').forEach(el=>el.textContent = SOURCE.credit);
 }
 applyFrame();
+countObi();
 sync();
 readHash();
 </script>
