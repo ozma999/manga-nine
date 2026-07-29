@@ -141,6 +141,12 @@ button{ font:inherit; color:inherit; cursor:pointer }
 /* ── 직접 올리기 ──────────────────────────── */
 .upload{ margin-top:16px; border-top:var(--hair); padding-top:14px }
 .upload__hint{ font-size:12px; color:var(--ink-soft); margin:0 0 9px }
+.memo{
+  margin:12px 0 0; padding-top:10px; border-top:1px solid var(--pulp-deep);
+  display:flex; align-items:baseline; gap:10px; justify-content:space-between;
+  font-size:12px; color:var(--ink-soft);
+}
+.memo .btn--bare{ font-size:10.5px; flex:none }
 .btn{
   border:2px solid var(--ink); background:var(--pulp-lit); padding:9px 14px;
   font-family:var(--data); font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
@@ -307,6 +313,10 @@ button{ font:inherit; color:inherit; cursor:pointer }
         <button class="btn" id="btnDemo" type="button">예시로 채우기</button>
       </div>
       <input type="file" id="file" accept="image/*" multiple hidden>
+      <p class="memo" id="memo" hidden>
+        <span id="memoText"></span>
+        <button type="button" class="btn btn--bare" id="memoClear">지우기</button>
+      </p>
     </div>
   </section>
 
@@ -589,6 +599,53 @@ const AniList = (() => {
 const SOURCE = AniList;
 
 /* ═══════════════════════════════════════════════════════
+   고친 제목 기억
+   사용자가 손으로 바꾼 제목을 이 브라우저에 남긴다.
+   이후 그 제목으로 검색되고, 같은 작품을 다시 불러도 그 제목으로 나온다.
+   저장이 막힌 환경(파일 직접 열기, 시크릿 모드 일부)에서는 조용히 건너뛴다.
+   ═══════════════════════════════════════════════════════ */
+const norm = s => String(s).replace(/[\s·・-]/g,'').toLowerCase();
+
+const MEMO = (() => {
+  const KEY = 'mlmm.titles.v1';
+  let map = {}, alive = true;
+  try{ map = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
+  catch{ map = {}; alive = false; }
+  const save = () => { if(!alive) return; try{ localStorage.setItem(KEY, JSON.stringify(map)); }catch{ alive = false; } };
+  const k = id => 'a' + id;                          /* 소스별로 구분해 담는다 */
+
+  return {
+    get alive(){ return alive; },
+    size: () => Object.keys(map).length,
+    /* 작품을 통째로 담아둔다. 표지 주소까지 있으니 다시 검색하지 않아도 꺼낼 수 있다. */
+    put(w){
+      if(w == null || w.id == null || w.local) return;
+      map[k(w.id)] = { t:w.title, s:w.src, y:w.year||'', d:w.kind||'', b:w.by||'', i:w.byId||null };
+      save();
+    },
+    apply(w){                                        /* 기억한 제목을 씌운다 */
+      const r = w && w.id != null ? map[k(w.id)] : null;
+      return r ? { ...w, title:r.t, origTitle:w.origTitle ?? w.title } : w;
+    },
+    lookup(term){                                    /* 기억한 제목으로 찾는다 */
+      const q = norm(term);
+      if(q.length < 2) return [];
+      const rows = Object.entries(map).map(([key,r])=>({ key, r, n:norm(r.t) }));
+      const hit = [...rows.filter(x=>x.n.startsWith(q)), ...rows.filter(x=>!x.n.startsWith(q) && x.n.includes(q))];
+      return hit.slice(0,12).map(({key,r})=>({
+        id: parseInt(key.slice(1),10), title:r.t, origTitle:r.t, src:r.s,
+        year:r.y, kind:r.d, by:r.b, byId:r.i,
+        meta:[r.d==='만화'?null:r.d, r.y, r.b].filter(Boolean).join(' · '),
+        fromMemo: true
+      }));
+    },
+    clear(){ map = {}; save(); }
+  };
+})();
+
+const remember = list => list.map(w => MEMO.apply(w));
+
+/* ═══════════════════════════════════════════════════════
    상태
    ═══════════════════════════════════════════════════════ */
 const slots = Array(9).fill(null);   // {id?,title,meta,src,local?}
@@ -633,7 +690,14 @@ function renderGrid(justFilled){
       cap.setAttribute('aria-label', `${i+1}번 칸 제목`);
       cap.onclick = e=>e.stopPropagation();
       cap.onkeydown = e=>{ e.stopPropagation(); if(e.key==='Enter') cap.blur(); };
-      cap.oninput = ()=>{ w.title = cap.value; clearTimeout(w._t); w._t=setTimeout(writeHash,400); };
+      cap.oninput = ()=>{
+        w.title = cap.value;
+        clearTimeout(w._t);
+        w._t = setTimeout(()=>{                      /* 손이 멈추면 기억한다 */
+          if(w.id != null && w.title.trim() && w.title !== w.origTitle) MEMO.put(w);
+          writeHash(); showMemo();
+        }, 500);
+      };
       b.appendChild(cap);
       const x=document.createElement('button');
       x.type='button'; x.className='slot__x'; x.innerHTML='&times;';
@@ -685,18 +749,27 @@ qEl.addEventListener('input', ()=>{
   timer = setTimeout(async ()=>{
     const my = ++seq;
     try{
+      const mine = MEMO.lookup(v);                    /* 내가 고친 제목이 먼저 */
       const { items, guessed } = await SOURCE.search(v);
       if(my!==seq) return;
-      hits = items; cursor = -1; drawHits();
+
+      const seen = new Set(mine.map(w=>w.id));
+      hits = [...mine, ...remember(items).filter(w=>!seen.has(w.id))];
+      cursor = -1; drawHits();
+
       const also = guessed.length ? ` ${guessed.slice(0,2).join(', ')}(으)로도 찾았습니다.` : '';
-      stateEl.textContent = items.length
-        ? `${items.length}편 찾았습니다. 누르면 칸에 들어갑니다.${also}`
+      const mem = mine.length ? ` 고쳐둔 제목 ${mine.length}편을 앞에 놓았습니다.` : '';
+      stateEl.textContent = hits.length
+        ? `${hits.length}편 찾았습니다. 누르면 칸에 들어갑니다.${mem}${also}`
         : '못 찾았습니다. 작가 이름이 안 걸리면 대표작을 검색한 뒤 결과에 뜬 작가 이름을 눌러보세요.';
     }catch(err){
       if(my!==seq) return;
-      hits=[]; drawHits();
+      hits = MEMO.lookup(v);                         /* 서버가 막혀도 기억한 것은 꺼낸다 */
+      cursor = -1; drawHits();
       stateEl.dataset.tone='err';
-      stateEl.textContent = '검색 서버에 닿지 못했습니다. 연결을 확인하거나 표지를 직접 올려 채우세요.';
+      stateEl.textContent = hits.length
+        ? `검색 서버에 닿지 못했습니다. 고쳐둔 제목 ${hits.length}편만 보여드립니다.`
+        : '검색 서버에 닿지 못했습니다. 연결을 확인하거나 표지를 직접 올려 채우세요.';
     }
   }, 300);
 });
@@ -710,7 +783,7 @@ function drawHits(){
     const b=document.createElement('div');
     b.className='hit'; b.setAttribute('role','option'); b.tabIndex=-1;
     b.setAttribute('aria-selected', String(n===cursor));
-    const head = [w.kind, w.year].filter(Boolean).join(' · ');
+    const head = [w.fromMemo ? '고친 제목' : w.kind, w.year].filter(Boolean).join(' · ');
     b.innerHTML = `<img class="hit__cover" src="${w.src}" alt="" loading="lazy" referrerpolicy="no-referrer">
       <span><span class="hit__title">${esc(w.title)}</span><span class="hit__meta">${esc(head)}</span></span>
       <span class="hit__add" aria-hidden="true">＋</span>`;
@@ -744,7 +817,7 @@ async function fromStaff(id, who){
   stateEl.dataset.tone=''; stateEl.textContent = `${who}의 작품을 불러오는 중…`;
   try{
     const { items } = await SOURCE.byStaffId(id);
-    hits = items; cursor = -1; drawHits();
+    hits = remember(items); cursor = -1; drawHits();
     qEl.value = who; $('#qClear').hidden = false;
     stateEl.textContent = items.length
       ? `${who}의 작품 ${items.length}편입니다. 누르면 칸에 들어갑니다.`
@@ -791,7 +864,7 @@ $('#btnDemo').onclick = async ()=>{
   try{
     /* 처음은 정해진 아홉 편, 두 번째부터는 사전 전체에서 무작위로 */
     const terms = demoRun === 0 ? SOURCE.demo : shuffle(SOURCE.demoPool).slice(0, 9);
-    const found = await SOURCE.sample(terms);
+    const found = remember(await SOURCE.sample(terms));
     if(!found.length){ tell('예시를 불러오지 못했습니다.','err'); return; }
     slots.fill(null);
     found.slice(0,9).forEach((w,i)=>slots[i]=w);
@@ -885,7 +958,7 @@ async function restore(p){
   const want = ids.filter(Number.isInteger);
   if(!want.length){ if(tokens.some(t=>t.trim()==='u')) sync(); return; }
   try{
-    const found = await SOURCE.byIds([...new Set(want)]);
+    const found = remember(await SOURCE.byIds([...new Set(want)]));
     const map = Object.fromEntries(found.map(w=>[w.id,w]));
     ids.forEach((id,i)=>{ if(map[id]) slots[i]={...map[id]}; });
     Object.entries(named).forEach(([i,t])=>{ if(slots[i]) slots[i].title=t; });
@@ -1179,6 +1252,16 @@ $('#btnSave').onclick = async ()=>{
 /* ═══════════════════════════════════════════════════════
    시작
    ═══════════════════════════════════════════════════════ */
+function showMemo(){
+  const n = MEMO.size(), el = $('#memo');
+  el.hidden = n === 0;
+  if(n) $('#memoText').textContent = `고친 제목 ${n}편을 이 브라우저가 기억하고 있습니다. 그 제목으로도 검색됩니다.`;
+}
+$('#memoClear').onclick = ()=>{
+  MEMO.clear(); showMemo();
+  tell('기억한 제목을 모두 지웠습니다. 지금 격자에 있는 제목은 그대로 남습니다.');
+};
+
 function applyFrame(){                                  /* 소스가 바뀌면 이 문안만 따라 바뀐다 */
   $('.find__label').textContent = SOURCE.label;
   qEl.placeholder = SOURCE.placeholder;
@@ -1186,6 +1269,7 @@ function applyFrame(){                                  /* 소스가 바뀌면 �
 }
 applyFrame();
 countObi();
+showMemo();
 sync();
 readHash();
 </script>
